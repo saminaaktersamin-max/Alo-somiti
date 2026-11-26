@@ -1,0 +1,3005 @@
+```html
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>সমবায় সমিতি ম্যানেজমেন্ট সিস্টেম</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --royal-blue: #15499F;
+      --royal-blue-dark: #0f3678;
+      --gold-bar: #f5be18;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Hind Siliguri', 'Inter', sans-serif;
+      background-color: #e6ecf5;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 470px;
+      min-height: 100vh;
+      margin: 0 auto;
+      background-color: #f4f6f9;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 22px 55px rgba(15, 23, 42, 0.16);
+      overflow-x: hidden;
+    }
+
+    @media (min-width: 640px) {
+      .app-shell {
+        min-height: calc(100vh - 2rem);
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 30px;
+        border: 1px solid #d5dfee;
+      }
+    }
+
+    .royal-header {
+      background: linear-gradient(135deg, #15499F 0%, #10397e 100%);
+      border-bottom-left-radius: 22px;
+      border-bottom-right-radius: 22px;
+    }
+
+    .category-tile {
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid #eaeff7;
+      box-shadow: 0 2px 8px rgba(21, 73, 159, 0.05);
+      transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+    }
+
+    .category-tile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(21, 73, 159, 0.11);
+      border-color: #c3d7f8;
+    }
+
+    .category-tile:active {
+      transform: scale(0.97);
+    }
+
+    .fade-in {
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .signature-canvas {
+      touch-action: none;
+      background-color: #f8fafc;
+    }
+
+    @media print {
+      body { background: #fff; }
+      .app-shell { max-width: 100%; box-shadow: none; border: none; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Toast / Simulated SMS OTP Notification Area -->
+  <div id="toast-container" class="fixed top-3 left-1/2 -translate-x-1/2 z-[80] w-[92%] max-w-[430px] flex flex-col gap-2 pointer-events-none no-print"></div>
+
+  <!-- Universal Modal Dialog -->
+  <div id="modal-backdrop" class="fixed inset-0 bg-slate-950/60 backdrop-blur-[2px] z-50 hidden items-center justify-center p-3 sm:p-4 overflow-y-auto no-print">
+    <div id="modal-card" class="bg-white rounded-2xl w-full max-w-[440px] shadow-2xl border border-slate-100 overflow-hidden fade-in my-auto">
+      <div class="px-4 py-3 bg-[#15499F] text-white flex items-center justify-between">
+        <h3 id="modal-title" class="font-bold text-base">তথ্য</h3>
+        <button type="button" onclick="closeModal()" class="p-1 rounded-lg hover:bg-white/15 transition" aria-label="Close">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modal-body" class="p-4 max-h-[78vh] overflow-y-auto text-sm text-slate-700 space-y-3"></div>
+      <div id="modal-footer" class="px-4 py-3 bg-slate-50 border-t border-slate-100 flex justify-end gap-2"></div>
+    </div>
+  </div>
+
+  <!-- Main App Shell -->
+  <div id="app-shell" class="app-shell">
+
+    <!-- ==================== AUTHENTICATION SCREEN ==================== -->
+    <div id="auth-screen" class="flex-1 flex flex-col justify-between bg-[#f4f6f9]">
+      <div>
+        <div class="royal-header px-5 pt-7 pb-8 text-white text-center shadow-md">
+          <div class="w-16 h-16 mx-auto rounded-full bg-white p-1 shadow-md flex items-center justify-center overflow-hidden mb-3">
+            <img id="auth-logo-img" src="" alt="Logo" class="w-full h-full object-cover rounded-full hidden" />
+            <div id="auth-logo-fallback" class="w-full h-full rounded-full bg-[#15499F] text-white flex flex-col items-center justify-center leading-none">
+              <i data-lucide="globe" class="w-6 h-6"></i>
+              <span class="text-[8px] font-bold mt-0.5">সমিতি</span>
+            </div>
+          </div>
+          <h1 id="auth-society-name" class="text-xl font-bold tracking-tight">নব আলো সমবায় সমিতি</h1>
+          <p id="auth-subtitle" class="text-xs text-blue-100 mt-1">বিশ্বের যেকোনো দেশ থেকে পরিচালিত সমবায় ও অনলাইন পেমেন্ট সিস্টেম</p>
+        </div>
+
+        <div class="p-4 sm:p-5 -mt-3">
+          <!-- First-time Main Admin Sign-up -->
+          <div id="signup-box" class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hidden fade-in">
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4 text-xs text-blue-900 leading-relaxed">
+              <strong>প্রথমবার সেটআপ (Main Admin):</strong>
+              আপনি সাইন আপ করে প্রধান অ্যাডমিন হবেন। সকল হিসাব শুরু হবে <strong>0.00</strong> থেকে এবং বিশ্বের যেকোনো দেশ ও মুদ্রা (BDT, USD, GBP, EUR, SAR, AED, MYR, SGD, INR) সেট করতে পারবেন।
+            </div>
+            <h2 class="text-lg font-bold text-slate-800 mb-3">প্রধান অ্যাডমিন সাইন আপ</h2>
+            <form onsubmit="handleMainAdminSignup(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">সমিতির নাম (যেকোনো সময় পরিবর্তনযোগ্য) *</label>
+                <input id="signup-society-name" type="text" required value="নব আলো সমবায় সমিতি" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#15499F] outline-none" />
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">প্রধান দেশ *</label>
+                  <select id="signup-country" onchange="syncSignupCodeWithCountry()" class="w-full px-2.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white outline-none"></select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">প্রধান মুদ্রা (Currency) *</label>
+                  <select id="signup-currency" class="w-full px-2.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white outline-none"></select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">প্রধান অ্যাডমিনের নাম *</label>
+                <input id="signup-admin-name" type="text" required placeholder="পূর্ণ নাম লিখুন" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#15499F] outline-none" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">আন্তর্জাতিক মোবাইল নাম্বার *</label>
+                <div class="flex gap-2">
+                  <select id="signup-dial-code" class="w-28 px-2 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 outline-none"></select>
+                  <input id="signup-admin-mobile" type="tel" required placeholder="1XXXXXXXXX" class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#15499F] outline-none" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">পাসওয়ার্ড *</label>
+                <input id="signup-admin-password" type="password" required minlength="4" placeholder="কমপক্ষে ৪ অক্ষর" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#15499F] outline-none" />
+              </div>
+
+              <button type="submit" class="w-full py-3 rounded-xl bg-[#15499F] hover:bg-[#0f3678] text-white font-bold text-sm shadow-md transition">
+                প্রধান অ্যাডমিন একাউন্ট খুলুন
+              </button>
+            </form>
+          </div>
+
+          <!-- Sign-in Box -->
+          <div id="signin-box" class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hidden fade-in">
+            <h2 class="text-lg font-bold text-slate-800 mb-1">সাইন ইন করুন</h2>
+            <p class="text-xs text-slate-500 mb-4">আপনার দেশের কোডসহ নিবন্ধিত মোবাইল নাম্বার ও পাসওয়ার্ড দিন</p>
+            <form onsubmit="handleSignIn(event)" class="space-y-3.5">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">মোবাইল নাম্বার (Country Code সহ)</label>
+                <div class="flex gap-2">
+                  <select id="login-dial-code" class="w-28 px-2 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 outline-none"></select>
+                  <input id="login-mobile" type="tel" required placeholder="1XXXXXXXXX" class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#15499F] outline-none" />
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-semibold text-slate-600">পাসওয়ার্ড</label>
+                  <button type="button" onclick="openForgotOtpView()" class="text-xs font-semibold text-[#15499F] hover:underline">পাসওয়ার্ড ভুলে গেছেন? (OTP রিসেট)</button>
+                </div>
+                <input id="login-password" type="password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#15499F] outline-none" />
+              </div>
+              <button type="submit" class="w-full py-3 rounded-xl bg-[#15499F] hover:bg-[#0f3678] text-white font-bold text-sm shadow-md transition">
+                সাইন ইন
+              </button>
+            </form>
+          </div>
+
+          <!-- OTP Reset Box -->
+          <div id="otp-box" class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hidden fade-in">
+            <button type="button" onclick="backToSignIn()" class="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 mb-3">
+              <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> লগইনে ফিরে যান
+            </button>
+            <h2 class="text-lg font-bold text-slate-800 mb-1">আন্তর্জাতিক মোবাইল OTP পাসওয়ার্ড রিসেট</h2>
+            <p class="text-xs text-slate-500 mb-4">আপনার নিবন্ধিত মোবাইল নাম্বারে ৬ সংখ্যার OTP পাঠানো হবে</p>
+
+            <form id="otp-send-form" onsubmit="handleRequestOtp(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">নিবন্ধিত মোবাইল নাম্বার</label>
+                <div class="flex gap-2">
+                  <select id="otp-dial-code" class="w-28 px-2 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 outline-none"></select>
+                  <input id="otp-mobile-input" type="tel" required placeholder="1XXXXXXXXX" class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#15499F] outline-none" />
+                </div>
+              </div>
+              <button type="submit" class="w-full py-2.5 rounded-xl bg-[#15499F] hover:bg-[#0f3678] text-white font-bold text-sm transition">
+                OTP পাঠান
+              </button>
+            </form>
+
+            <form id="otp-verify-form" onsubmit="handleResetWithOtp(event)" class="space-y-3 hidden">
+              <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-xs text-amber-900">
+                উপরে SMS নোটিফিকেশনে আসা ৬ সংখ্যার OTP কোডটি লিখুন।
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">৬ সংখ্যার OTP কোড</label>
+                <input id="otp-code-input" type="text" required maxlength="6" placeholder="123456" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-center font-bold tracking-widest text-base focus:ring-2 focus:ring-[#15499F] outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">নতুন পাসওয়ার্ড</label>
+                <input id="otp-new-pass-input" type="password" required minlength="4" placeholder="নতুন পাসওয়ার্ড দিন" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-[#15499F] outline-none" />
+              </div>
+              <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition">
+                পাসওয়ার্ড পরিবর্তন করুন
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-[#15499F] h-11 px-6 flex items-center justify-around text-white/90">
+        <span class="w-3.5 h-3.5 border-2 border-white/80 rounded-[2px]"></span>
+        <span class="w-4 h-4 border-2 border-white/80 rounded-full"></span>
+        <button type="button" onclick="toggleLanguage()" class="text-xs font-semibold bg-white/15 px-3 py-1 rounded-full">
+          English / বাংলা
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== MAIN APPLICATION SCREEN ==================== -->
+    <div id="main-screen" class="flex-1 flex flex-col hidden">
+
+      <!-- Slide-out Drawer -->
+      <div id="drawer-backdrop" onclick="closeDrawer()" class="fixed inset-0 bg-slate-950/50 z-40 hidden no-print"></div>
+      <aside id="side-drawer" class="fixed top-0 left-0 bottom-0 w-72 max-w-[82vw] bg-white z-50 -translate-x-full transition-transform duration-200 shadow-2xl flex flex-col justify-between no-print">
+        <div class="overflow-y-auto">
+          <div class="p-4 bg-[#15499F] text-white">
+            <div class="flex items-center gap-3">
+              <img id="drawer-user-photo" src="" alt="User" class="w-12 h-12 rounded-full object-cover border-2 border-white/80 bg-white" />
+              <div class="min-w-0">
+                <p id="drawer-user-name" class="font-bold text-sm truncate">ব্যবহারকারী</p>
+                <p id="drawer-user-role" class="text-[11px] text-blue-100">ভূমিকা</p>
+                <p id="drawer-user-mobile" class="text-[11px] text-blue-200 truncate">+8801XXXXXXXXX</p>
+              </div>
+            </div>
+            <div id="drawer-global-badge" class="mt-2.5 px-2.5 py-1 rounded-lg bg-white/15 text-[11px] flex items-center justify-between">
+              <span id="drawer-country-label">বাংলাদেশ (Bangladesh)</span>
+              <span id="drawer-currency-label" class="font-bold">৳ BDT</span>
+            </div>
+          </div>
+
+          <div class="p-3 space-y-1">
+            <button type="button" onclick="navigateTo('home'); closeDrawer();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-[#15499F]">
+              <i data-lucide="home" class="w-4 h-4 text-[#15499F]"></i> <span data-i18n="home">হোম / ড্যাশবোর্ড</span>
+            </button>
+            <button type="button" onclick="navigateTo('customers'); closeDrawer();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-[#15499F]">
+              <i data-lucide="users" class="w-4 h-4 text-[#15499F]"></i> <span data-i18n="customers">গ্রাহক / সদস্য</span>
+            </button>
+            <button type="button" onclick="navigateTo('savings'); closeDrawer();" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-[#15499F]">
+              <span class="flex items-center gap-3"><i data-lucide="wallet" class="w-4 h-4 text-[#15499F]"></i> <span data-i18n="savings">সঞ্চয় / অনলাইন পেমেন্ট</span></span>
+              <span id="drawer-pending-pay-badge" class="hidden px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500 text-white">0</span>
+            </button>
+            <button type="button" onclick="navigateTo('banking'); closeDrawer();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-[#15499F]">
+              <i data-lucide="landmark" class="w-4 h-4 text-[#15499F]"></i> <span data-i18n="banking">ব্যাংকিং ও পেমেন্ট গেটওয়ে</span>
+            </button>
+            <button type="button" onclick="navigateTo('loans'); closeDrawer();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-[#15499F]">
+              <i data-lucide="calculator" class="w-4 h-4 text-[#15499F]"></i> <span data-i18n="loans">ঋণ আবেদন ও অনুমোদন</span>
+            </button>
+            <button type="button" onclick="navigateTo('messages'); closeDrawer();" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-[#15499F]">
+              <span class="flex items-center gap-3"><i data-lucide="message-square" class="w-4 h-4 text-[#15499F]"></i> <span data-i18n="messages">বার্তা পাঠান</span></span>
+              <span id="drawer-unread-badge" class="hidden px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-600 text-white">0</span>
+            </button>
+            <button type="button" onclick="openProfileModal(); closeDrawer();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-[#15499F]">
+              <i data-lucide="user-cog" class="w-4 h-4 text-[#15499F]"></i> <span data-i18n="myProfile">আমার প্রোফাইল এডিট</span>
+            </button>
+            <button type="button" onclick="navigateTo('settings'); closeDrawer();" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-[#15499F]">
+              <i data-lucide="settings" class="w-4 h-4 text-[#15499F]"></i> <span data-i18n="settings">সেটিংস</span>
+            </button>
+
+            <div class="pt-3 mt-2 border-t border-slate-100">
+              <label class="block text-[11px] font-bold text-slate-400 uppercase px-2 mb-1" data-i18n="quickSwitch">দ্রুত একাউন্ট পরিবর্তন</label>
+              <select id="quick-account-select" onchange="switchLoggedInAccount(this.value)" class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50 outline-none"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 border-t border-slate-100">
+          <button type="button" onclick="handleLogout()" class="w-full py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs flex items-center justify-center gap-2 transition">
+            <i data-lucide="log-out" class="w-4 h-4"></i> <span data-i18n="logout">লগআউট করুন</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Top Royal Blue Header (#15499F) -->
+      <header class="royal-header px-4 pt-3.5 pb-4 text-white flex items-center justify-between shadow-sm sticky top-0 z-30 no-print">
+        <button type="button" onclick="openDrawer()" class="p-1.5 rounded-lg hover:bg-white/15 transition" aria-label="Menu">
+          <i data-lucide="menu" class="w-6 h-6 text-white"></i>
+        </button>
+
+        <div class="flex-1 text-center px-2 min-w-0">
+          <button type="button" onclick="navigateTo('home')" class="inline-flex flex-col items-center max-w-full">
+            <h1 id="header-society-name" class="text-lg sm:text-[19px] font-bold tracking-tight truncate">নব আলো সমবায় সমিতি</h1>
+            <div class="flex items-center justify-center gap-1.5 mt-0.5 flex-wrap">
+              <span id="header-region-pill" class="text-[10px] text-blue-100 font-medium tracking-wide">বাংলাদেশ • ৳ BDT</span>
+              <button id="header-sync-pill" type="button" onclick="triggerCloudSync(true)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/20 text-emerald-100 border border-emerald-300/40 hover:bg-white/15 transition" title="ক্লাউড সিংক স্ট্যাটাস ও সিংক বাটন">
+                <span id="header-sync-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-300"></span>
+                <span id="header-sync-text">Online • Synced</span>
+              </button>
+            </div>
+          </button>
+        </div>
+
+        <button type="button" onclick="navigateTo('settings')" class="relative w-10 h-10 rounded-full bg-white p-0.5 shadow flex items-center justify-center shrink-0 overflow-hidden" title="সমিতির লোগো ও সেটিংস">
+          <img id="header-logo-img" src="" alt="Samity Logo" class="w-full h-full object-cover rounded-full hidden" />
+          <div id="header-logo-badge" class="w-full h-full rounded-full bg-[#15499F] text-white flex flex-col items-center justify-center leading-none border border-blue-200/40">
+            <span class="text-[7px] font-bold text-amber-300">সমবায়</span>
+            <span class="text-[8px] font-extrabold mt-0.5">সমিতি</span>
+          </div>
+          <span id="header-notif-dot" class="hidden absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-[#15499F]">0</span>
+        </button>
+      </header>
+
+      <!-- Main Scrollable Content -->
+      <main id="view-container" class="flex-1 px-3.5 pt-3.5 pb-4 space-y-4">
+
+        <!-- ==================== HOME / DASHBOARD VIEW ==================== -->
+        <section id="view-home" class="app-view space-y-4 fade-in">
+          <!-- Top Summary Card: Available Balance & Current Profit -->
+          <div class="bg-white rounded-2xl px-3 py-4 shadow-sm border border-slate-200/70 grid grid-cols-2 divide-x divide-slate-200">
+            <div class="flex items-center gap-2.5 px-1.5 min-w-0">
+              <div class="w-10 h-10 rounded-full bg-[#15499F] text-white flex items-center justify-center shrink-0 shadow-sm">
+                <i data-lucide="wallet" class="w-5 h-5"></i>
+              </div>
+              <div class="min-w-0">
+                <p id="lbl-available-balance" class="text-xs font-medium text-slate-600 truncate">উপলব্ধ ব্যালেন্স</p>
+                <p id="val-available-balance" class="text-sm sm:text-[15px] font-bold text-slate-900 truncate mt-0.5">৳ ০.০০</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 px-2.5 min-w-0">
+              <div class="w-10 h-10 rounded-full bg-[#15499F] text-white flex items-center justify-center shrink-0 shadow-sm">
+                <i data-lucide="wallet" class="w-5 h-5"></i>
+              </div>
+              <div class="min-w-0">
+                <p id="lbl-current-profit" class="text-xs font-medium text-slate-600 truncate">বর্তমান লাভ</p>
+                <p id="val-current-profit" class="text-sm sm:text-[15px] font-bold text-slate-900 truncate mt-0.5">৳ ০.০০</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending Verification Quick Alert (When online payments wait for approval) -->
+          <div id="home-pending-alert" class="hidden bg-amber-50 border border-amber-200 rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <i data-lucide="clock" class="w-4 h-4 text-amber-600 shrink-0"></i>
+              <p id="home-pending-text" class="text-xs font-semibold text-amber-900 truncate">অনলাইন পেমেন্ট ভেরিফিকেশনের অপেক্ষায় আছে</p>
+            </div>
+            <button type="button" onclick="navigateTo('savings')" class="px-2.5 py-1 rounded-lg bg-amber-600 text-white text-[11px] font-bold shrink-0">যাচাই করুন</button>
+          </div>
+
+          <!-- Offline-First & Cloud Sync Status Strip -->
+          <div id="home-sync-strip" class="bg-white rounded-2xl px-3.5 py-2.5 shadow-sm border border-slate-200/70 flex items-center justify-between gap-2 text-xs">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span id="home-net-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Online</span>
+                <span id="home-queue-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">Queue: 0</span>
+              </div>
+              <p id="home-last-sync-text" class="text-[11px] text-slate-500 truncate mt-1">Last Sync: এখনো সিংক হয়নি</p>
+            </div>
+            <button id="btn-home-sync-now" type="button" onclick="triggerCloudSync(true)" class="px-3 py-1.5 rounded-xl bg-[#15499F] hover:bg-[#0f3678] text-white text-[11px] font-bold flex items-center gap-1 shrink-0 shadow-sm transition">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span data-i18n="syncNow">Sync Now</span>
+            </button>
+          </div>
+
+          <!-- Category 4x2 Icon Grid -->
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between px-0.5">
+              <h2 id="lbl-category" class="text-sm font-bold text-slate-700">ক্যাটাগরি</h2>
+              <button type="button" onclick="openAimsModal()" class="text-[11px] font-semibold text-[#15499F] hover:underline flex items-center gap-1">
+                <i data-lucide="target" class="w-3 h-3"></i> <span data-i18n="viewAims">লক্ষ্য ও উদ্দেশ্য</span>
+              </button>
+            </div>
+            <div class="grid grid-cols-4 gap-2.5">
+              <button type="button" onclick="navigateTo('reports')" class="category-tile py-3.5 px-1.5 flex flex-col items-center justify-center gap-2 text-center">
+                <i data-lucide="layout-grid" class="w-7 h-7 text-[#15499F] stroke-[2.2]"></i>
+                <span id="cat-reports" class="text-xs font-medium text-slate-700 leading-tight">রিপোর্টস</span>
+              </button>
+
+              <button type="button" onclick="navigateTo('customers')" class="category-tile py-3.5 px-1.5 flex flex-col items-center justify-center gap-2 text-center">
+                <i data-lucide="users" class="w-7 h-7 text-[#15499F] stroke-[2.2]"></i>
+                <span id="cat-customers" class="text-xs font-medium text-slate-700 leading-tight">গ্রাহক</span>
+              </button>
+
+              <button type="button" onclick="navigateTo('savings')" class="category-tile py-3.5 px-1.5 flex flex-col items-center justify-center gap-2 text-center">
+                <i data-lucide="wallet" class="w-7 h-7 text-[#15499F] stroke-[2.2]"></i>
+                <span id="cat-savings" class="text-xs font-medium text-slate-700 leading-tight">সঞ্চয়</span>
+              </button>
+
+              <button type="button" onclick="navigateTo('loans')" class="category-tile py-3.5 px-1.5 flex flex-col items-center justify-center gap-2 text-center">
+                <i data-lucide="hand-coins" class="w-7 h-7 text-[#15499F] stroke-[2.2]"></i>
+                <span id="cat-loans" class="text-xs font-medium text-slate-700 leading-tight">ঋণ</span>
+              </button>
+
+              <button type="button" onclick="navigateTo('reports')" class="category-tile py-3.5 px-1.5 flex flex-col items-center justify-center gap-2 text-center">
+                <i data-lucide="file-spreadsheet" class="w-7 h-7 text-[#15499F] stroke-[2.2]"></i>
+                <span id="cat-sheet" class="text-xs font-medium text-slate-700 leading-tight">আদায় শীট</span>
+              </button>
+
+              <button type="button" onclick="navigateTo('reports')" class="category-tile py-3.5 px-1.5 flex flex-col items-center justify-center gap-2 text-center">
+                <i data-lucide="pie-chart" class="w-7 h-7 text-[#15499F] stroke-[2.2]"></i>
+                <span id="cat-col-reports" class="text-xs font-medium text-slate-700 leading-tight">আদায় রিপোর্টস</span>
+              </button>
+
+              <button type="button" onclick="navigateTo('banking')" class="category-tile py-3.5 px-1.5 flex flex-col items-center justify-center gap-2 text-center">
+                <i data-lucide="landmark" class="w-7 h-7 text-[#15499F] stroke-[2.2]"></i>
+                <span id="cat-banking" class="text-xs font-medium text-slate-700 leading-tight">ব্যাংকিং</span>
+              </button>
+
+              <button type="button" onclick="navigateTo('calculator')" class="category-tile py-3.5 px-1.5 flex flex-col items-center justify-center gap-2 text-center">
+                <i data-lucide="calculator" class="w-7 h-7 text-[#15499F] stroke-[2.2]"></i>
+                <span id="cat-calculator" class="text-xs font-medium text-slate-700 leading-tight">ঋণ ক্যালকুলেটর</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Usage Statistics Card -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70 space-y-2.5">
+            <p id="lbl-usage-stats" class="text-xs font-medium text-slate-500">ব্যবহারের পরিসংখ্যান</p>
+            <div class="flex items-center justify-between gap-2">
+              <h3 id="lbl-customer-limit" class="text-base font-bold text-slate-800">গ্রাহক সীমা</h3>
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-[#15499F] text-xs font-semibold">
+                <i data-lucide="globe" class="w-3.5 h-3.5 text-amber-500"></i>
+                <span id="lbl-tier-name">গ্লোবাল প্রিমিয়াম</span>
+              </span>
+            </div>
+
+            <div class="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
+              <div id="member-limit-bar" class="h-full rounded-full transition-all duration-300" style="width: 0%; background-color: var(--gold-bar);"></div>
+            </div>
+            <div class="text-center">
+              <span id="member-limit-bar-text" class="text-[11px] font-bold text-slate-700">০ ব্যবহৃত / ১০০ মোট ধারণক্ষমতা</span>
+            </div>
+
+            <div class="flex items-center justify-between text-xs pt-0.5">
+              <span id="member-percent-used" class="font-semibold text-slate-700">০% ব্যবহৃত</span>
+              <button type="button" onclick="navigateTo('customers')" id="member-slots-left" class="font-semibold text-amber-500 hover:underline">
+                ১০০ বাকি আছে..
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom 4-Icon Utility Row -->
+          <div class="grid grid-cols-4 gap-2.5 pt-0.5">
+            <button type="button" onclick="navigateTo('income-expense')" class="category-tile py-3.5 px-1.5 flex flex-col items-center justify-center gap-2 text-center">
+              <i data-lucide="bar-chart-3" class="w-7 h-7 text-[#15499F] stroke-[2.2]"></i>
+              <span id="util-income-expense" class="text-xs font-medium text-slate-700 leading-tight">আয় ব্যয়</span>
+            </button>
+
+            <button type="button" onclick="navigateTo('messages')" class="relative category-tile py-3.5 px-1.5 flex flex-col items-center justify-center gap-2 text-center">
+              <i data-lucide="message-square" class="w-7 h-7 text-[#15499F] stroke-[2.2]"></i>
+              <span id="util-messages" class="text-xs font-medium text-slate-700 leading-tight">বার্তা পাঠান</span>
+              <span id="home-msg-badge" class="hidden absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center">0</span>
+            </button>
+
+            <button type="button" onclick="toggleLanguage()" class="category-tile py-3.5 px-1.5 flex flex-col items-center justify-center gap-2 text-center">
+              <i data-lucide="languages" class="w-7 h-7 text-[#15499F] stroke-[2.2]"></i>
+              <span id="util-language" class="text-xs font-medium text-slate-700 leading-tight">ভাষা</span>
+            </button>
+
+            <button type="button" onclick="navigateTo('settings')" class="category-tile py-3.5 px-1.5 flex flex-col items-center justify-center gap-2 text-center">
+              <i data-lucide="settings" class="w-7 h-7 text-[#15499F] stroke-[2.2]"></i>
+              <span id="util-settings" class="text-xs font-medium text-slate-700 leading-tight">সেটিংস</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- ==================== CUSTOMERS / MEMBERS VIEW ==================== -->
+        <section id="view-customers" class="app-view space-y-3 hidden fade-in">
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70 flex items-center justify-between gap-2">
+            <div>
+              <h2 class="text-base font-bold text-slate-800" data-i18n="customersTitle">গ্রাহক / সদস্য তালিকা</h2>
+              <p class="text-xs text-slate-500" data-i18n="customersSub">দেশি ও প্রবাসী সদস্যদের তথ্য, ছবি ও স্বাক্ষর</p>
+            </div>
+            <button id="btn-add-customer" type="button" onclick="openMemberModal(null)" class="px-3 py-2 rounded-xl bg-[#15499F] hover:bg-[#0f3678] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm shrink-0">
+              <i data-lucide="user-plus" class="w-4 h-4"></i> <span data-i18n="addMember">নতুন সদস্য</span>
+            </button>
+          </div>
+          <div id="customers-list" class="space-y-2.5"></div>
+        </section>
+
+        <!-- ==================== SAVINGS & GLOBAL ONLINE PAYMENT VIEW ==================== -->
+        <section id="view-savings" class="app-view space-y-3 hidden fade-in">
+          <!-- Society Receiving Bank / Wallet Info Card -->
+          <div class="bg-blue-50/90 border border-blue-200 rounded-2xl p-3.5 space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold text-[#15499F] flex items-center gap-1.5">
+                <i data-lucide="landmark" class="w-4 h-4"></i> <span data-i18n="receivingAccountsTitle">সমিতির অনলাইন ব্যাংক ও পেমেন্ট একাউন্টসমূহ</span>
+              </h3>
+              <button type="button" onclick="navigateTo('banking')" class="text-[11px] font-bold text-[#15499F] underline" data-i18n="manageBanks">ব্যাংক দেখুন</button>
+            </div>
+            <div id="savings-bank-preview" class="space-y-1.5 text-xs"></div>
+          </div>
+
+          <!-- Online Payment Submission Form -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
+            <h2 class="text-base font-bold text-slate-800 mb-3" data-i18n="collectionTitle">সঞ্চয় / চাঁদা ও কিস্তি পরিশোধ (যেকোনো দেশ থেকে)</h2>
+            <form onsubmit="handleRecordPayment(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="selectMember">সদস্য নির্বাচন করুন *</label>
+                <select id="pay-member" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-[#15499F]"></select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="month">মাসের নাম *</label>
+                  <select id="pay-month" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-[#15499F]">
+                    <option value="জানুয়ারি">জানুয়ারি (January)</option>
+                    <option value="ফেব্রুয়ারি">ফেব্রুয়ারি (February)</option>
+                    <option value="মার্চ">মার্চ (March)</option>
+                    <option value="এপ্রিল">এপ্রিল (April)</option>
+                    <option value="মে">মে (May)</option>
+                    <option value="জুন">জুন (June)</option>
+                    <option value="জুলাই">জুলাই (July)</option>
+                    <option value="আগস্ট">আগস্ট (August)</option>
+                    <option value="সেপ্টেম্বর">সেপ্টেম্বর (September)</option>
+                    <option value="অক্টোবর">অক্টোবর (October)</option>
+                    <option value="নভেম্বর" selected>নভেম্বর (November)</option>
+                    <option value="ডিসেম্বর">ডিসেম্বর (December)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="year">সাল *</label>
+                  <select id="pay-year" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-[#15499F]">
+                    <option value="2025">২০২৫ (2025)</option>
+                    <option value="2026" selected>২০২৬ (2026)</option>
+                    <option value="2027">২০২৭ (2027)</option>
+                    <option value="2028">২০২৮ (2028)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="payType">ধরন (চাঁদা/কিস্তি/সঞ্চয়) *</label>
+                  <select id="pay-type" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-[#15499F]">
+                    <option value="চাঁদা">চাঁদা (Subscription)</option>
+                    <option value="কিস্তি">কিস্তি (Installment)</option>
+                    <option value="সঞ্চয়">সঞ্চয় (Savings)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1"><span data-i18n="amount">টাকার পরিমাণ</span> (<span class="active-curr-sym">৳</span>) *</label>
+                  <input id="pay-amount" type="number" min="0.01" step="0.01" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none focus:ring-2 focus:ring-[#15499F]" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="senderCountry">প্রেরকের দেশ *</label>
+                  <select id="pay-country" required class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white outline-none focus:ring-2 focus:ring-[#15499F]"></select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="paymentMethod">অনলাইন পেমেন্ট মাধ্যম *</label>
+                  <select id="pay-method" required class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white outline-none focus:ring-2 focus:ring-[#15499F]">
+                    <option value="বিকাশ (bKash)">বিকাশ (bKash)</option>
+                    <option value="নগদ (Nagad)">নগদ (Nagad)</option>
+                    <option value="রকেট (Rocket)">রকেট (Rocket)</option>
+                    <option value="Visa / Mastercard (International Card)">Visa / Mastercard (International Card)</option>
+                    <option value="PayPal">PayPal</option>
+                    <option value="Wise (TransferWise)">Wise (TransferWise)</option>
+                    <option value="Bank Wire Transfer (SWIFT / IBAN)">Bank Wire Transfer (SWIFT / IBAN)</option>
+                    <option value="Western Union">Western Union</option>
+                    <option value="Remitly">Remitly</option>
+                    <option value="ক্যাশ (Cash)">ক্যাশ (Cash)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="trxRef">ট্রানজেকশন আইডি / ব্যাংক রেফারেন্স নং *</label>
+                <input id="pay-trx" type="text" required placeholder="TrxID / SWIFT Ref / Card Auth Code" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-[#15499F]" />
+              </div>
+
+              <button type="submit" class="w-full py-2.5 rounded-xl bg-[#15499F] hover:bg-[#0f3678] text-white font-bold text-sm shadow transition" data-i18n="submitPayment">
+                অনলাইন পেমেন্ট জমা দিন
+              </button>
+            </form>
+          </div>
+
+          <!-- Payment Verification & History -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
+            <h3 class="text-sm font-bold text-slate-800 mb-2.5" data-i18n="recentPayments">অনলাইন পেমেন্ট ভেরিফিকেশন ও তালিকা</h3>
+            <div id="payments-history" class="space-y-2.5"></div>
+          </div>
+        </section>
+
+        <!-- ==================== BANKING & INTERNATIONAL GATEWAY VIEW ==================== -->
+        <section id="view-banking" class="app-view space-y-3 hidden fade-in">
+          <!-- Configure Society Bank & International Receiving Accounts -->
+          <div id="bank-account-setup-card" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
+            <h2 class="text-base font-bold text-slate-800 mb-1" data-i18n="bankSetupTitle">সমিতির ব্যাংক ও আন্তর্জাতিক পেমেন্ট গেটওয়ে সেটআপ</h2>
+            <p class="text-xs text-slate-500 mb-3" data-i18n="bankSetupSub">যেকোনো দেশ থেকে সদস্যরা এই অ্যাকাউন্টগুলোতে অনলাইন পেমেন্ট করতে পারবেন</p>
+            <form onsubmit="handleAddSocietyAccount(event)" class="space-y-2.5">
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">ব্যাংক / গেটওয়ে নাম *</label>
+                  <input id="acc-bank-name" type="text" required placeholder="যেমন: Islami Bank / Wise / PayPal" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">অ্যাকাউন্টের নাম *</label>
+                  <input id="acc-holder-name" type="text" required placeholder="Naba Alo Samity" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none" />
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">অ্যাকাউন্ট নং / IBAN / Email *</label>
+                  <input id="acc-number" type="text" required placeholder="2050XXXXXXXXX / IBAN" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono outline-none" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">SWIFT কোড / শাখা / রাউটিং</label>
+                  <input id="acc-swift" type="text" placeholder="IBBLBDDH / Branch" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono outline-none" />
+                </div>
+              </div>
+              <button type="submit" class="w-full py-2 rounded-xl bg-[#15499F] hover:bg-[#0f3678] text-white font-bold text-xs shadow transition">
+                পেমেন্ট অ্যাকাউন্ট যুক্ত করুন
+              </button>
+            </form>
+          </div>
+
+          <!-- Active Society Receiving Accounts List -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
+            <h3 class="text-sm font-bold text-slate-800 mb-2.5">সক্রিয় ব্যাংক ও আন্তর্জাতিক পেমেন্ট মাধ্যমসমূহ</h3>
+            <div id="society-accounts-list" class="space-y-2"></div>
+          </div>
+
+          <!-- Bank Deposit / Withdraw Ledger -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
+            <h3 class="text-sm font-bold text-slate-800 mb-2.5" data-i18n="bankingTitle">ব্যাংকিং লেনদেন (জমা / উত্তোলন)</h3>
+            <form onsubmit="handleBankTransaction(event)" class="space-y-2.5">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="bankName">ব্যাংক বা গেটওয়ের নাম *</label>
+                <input id="bank-name" type="text" required placeholder="সোনালী ব্যাংক / Wise / বিকাশ মার্চেন্ট" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none" />
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="bankAction">ধরন *</label>
+                  <select id="bank-action" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none">
+                    <option value="DEPOSIT">ব্যাংকে জমা (Deposit)</option>
+                    <option value="WITHDRAW">ব্যাংক থেকে উত্তোলন (Withdraw)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1"><span data-i18n="amount">পরিমাণ</span> (<span class="active-curr-sym">৳</span>) *</label>
+                  <input id="bank-amount" type="number" min="0.01" step="0.01" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold outline-none" />
+                </div>
+              </div>
+              <button type="submit" class="w-full py-2 rounded-xl bg-slate-800 text-white font-bold text-xs transition" data-i18n="recordBankTx">
+                ব্যাংক লেনদেন রেকর্ড করুন
+              </button>
+            </form>
+            <div id="bank-list" class="space-y-2 mt-3 pt-3 border-t border-slate-100"></div>
+          </div>
+        </section>
+
+        <!-- ==================== LOANS VIEW ==================== -->
+        <section id="view-loans" class="app-view space-y-3 hidden fade-in">
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
+            <h2 class="text-base font-bold text-slate-800 mb-1" data-i18n="loanApplyTitle">ঋণ / লোন আবেদন</h2>
+            <p class="text-xs text-slate-500 mb-3" data-i18n="loanApplySub">অ্যাডমিন অনুমোদন করলে ক্যাশিয়ারের কাছে স্বয়ংক্রিয় বার্তা যাবে</p>
+            <form onsubmit="handleLoanApplication(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="selectMember">আবেদনকারী সদস্য *</label>
+                <select id="loan-member" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-slate-50 outline-none"></select>
+              </div>
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1"><span data-i18n="loanAmount">লোনের পরিমাণ</span> (<span class="active-curr-sym">৳</span>) *</label>
+                  <input id="loan-amount" type="number" min="1" step="0.01" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="installmentCount">কিস্তির সংখ্যা *</label>
+                  <input id="loan-installments" type="number" min="1" max="60" required value="10" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="loanPurpose">লোনের উদ্দেশ্য *</label>
+                <input id="loan-purpose" type="text" required placeholder="ব্যবসা, প্রবাস কল্যাণ বা জরুরি প্রয়োজন" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none" />
+              </div>
+              <button type="submit" class="w-full py-2.5 rounded-xl bg-[#15499F] hover:bg-[#0f3678] text-white font-bold text-sm shadow transition" data-i18n="submitLoan">
+                লোন আবেদন পাঠান
+              </button>
+            </form>
+          </div>
+
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
+            <h3 class="text-sm font-bold text-slate-800 mb-2.5" data-i18n="loanListTitle">লোন আবেদন ও অনুমোদন তালিকা</h3>
+            <div id="loans-list" class="space-y-2.5"></div>
+          </div>
+        </section>
+
+        <!-- ==================== LOAN EMI CALCULATOR VIEW ==================== -->
+        <section id="view-calculator" class="app-view space-y-3 hidden fade-in">
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70 space-y-3">
+            <h2 class="text-base font-bold text-slate-800">ঋণ কিস্তি ক্যালকুলেটর (Loan EMI Calculator)</h2>
+            <div class="space-y-2.5">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">ঋণের মূল পরিমাণ (<span class="active-curr-sym">৳</span>)</label>
+                <input id="calc-principal" type="number" value="10000" oninput="calculateLoanEmi()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none" />
+              </div>
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">মুনাফা / সার্ভিস চার্জ (%)</label>
+                  <input id="calc-rate" type="number" step="0.5" value="5" oninput="calculateLoanEmi()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">কিস্তির সংখ্যা (মাস)</label>
+                  <input id="calc-months" type="number" value="10" oninput="calculateLoanEmi()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none" />
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 space-y-2 text-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-600">প্রতি কিস্তির পরিমাণ:</span>
+                <span id="calc-res-emi" class="font-bold text-sm text-[#15499F]">৳ ০.০০</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-600">মোট মুনাফা / চার্জ:</span>
+                <span id="calc-res-profit" class="font-bold text-emerald-700">৳ ০.০০</span>
+              </div>
+              <div class="flex justify-between pt-1.5 border-t border-blue-200">
+                <span class="font-bold text-slate-700">সর্বমোট পরিশোধযোগ্য:</span>
+                <span id="calc-res-total" class="font-bold text-slate-900">৳ ০.০০</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== INCOME & EXPENSE VIEW ==================== -->
+        <section id="view-income-expense" class="app-view space-y-3 hidden fade-in">
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
+            <h2 class="text-base font-bold text-slate-800 mb-3" data-i18n="ledgerTitle">আয় ব্যয় হিসাব</h2>
+            <form onsubmit="handleLedgerEntry(event)" class="space-y-3">
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="entryType">ধরন *</label>
+                  <select id="ledger-type" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none">
+                    <option value="INCOME">আয় (Income / Profit)</option>
+                    <option value="EXPENSE">ব্যয় (Expense)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1"><span data-i18n="amount">পরিমাণ</span> (<span class="active-curr-sym">৳</span>) *</label>
+                  <input id="ledger-amount" type="number" min="0.01" step="0.01" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="categoryNote">খাত ও বিবরণ *</label>
+                <input id="ledger-note" type="text" required placeholder="যেমন: ঋণ সার্ভিস চার্জ / অফিস খরচ" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none" />
+              </div>
+              <button type="submit" class="w-full py-2.5 rounded-xl bg-[#15499F] hover:bg-[#0f3678] text-white font-bold text-sm shadow transition" data-i18n="saveLedger">
+                হিসাব সংরক্ষণ করুন
+              </button>
+            </form>
+          </div>
+
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
+            <h3 class="text-sm font-bold text-slate-800 mb-2.5" data-i18n="ledgerHistory">আয়-ব্যয়ের খতিয়ান</h3>
+            <div id="ledger-list" class="space-y-2"></div>
+          </div>
+        </section>
+
+        <!-- ==================== REPORTS & COLLECTION SHEET VIEW ==================== -->
+        <section id="view-reports" class="app-view space-y-3 hidden fade-in">
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-base font-bold text-slate-800">রিপোর্টস ও আদায় শীট</h2>
+              <button type="button" onclick="window.print()" class="px-2.5 py-1.5 rounded-lg bg-blue-50 text-[#15499F] text-xs font-bold flex items-center gap-1 no-print">
+                <i data-lucide="printer" class="w-3.5 h-3.5"></i> প্রিন্ট / PDF
+              </button>
+            </div>
+            <div id="report-summary-grid" class="grid grid-cols-2 gap-2.5 text-xs"></div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
+            <h3 class="text-sm font-bold text-slate-800 mb-2.5" data-i18n="collectionSheetHeading">সদস্যভিত্তিক আদায় শীট</h3>
+            <div id="collection-sheet-body" class="space-y-2"></div>
+          </div>
+        </section>
+
+        <!-- ==================== MESSAGES / CASHIER INBOX VIEW ==================== -->
+        <section id="view-messages" class="app-view space-y-3 hidden fade-in">
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70 flex items-center justify-between">
+            <div>
+              <h2 class="text-base font-bold text-slate-800" data-i18n="messagesTitle">বার্তা পাঠান ও ক্যাশিয়ার ইনবক্স</h2>
+              <p class="text-xs text-slate-500" data-i18n="messagesSub">লোন অনুমোদন ও পেমেন্ট বার্তা ক্যাশিয়ারের কাছে আসে</p>
+            </div>
+            <button type="button" onclick="markAllMessagesRead()" class="px-2.5 py-1.5 rounded-lg bg-blue-50 text-[#15499F] text-xs font-bold" data-i18n="markRead">সব পঠিত</button>
+          </div>
+
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
+            <form onsubmit="handleSendCustomMessage(event)" class="flex gap-2">
+              <input id="custom-msg-input" type="text" required placeholder="ক্যাশিয়ার বা সদস্যদের জন্য বার্তা লিখুন..." class="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-[#15499F]" />
+              <button type="submit" class="px-3.5 py-2 rounded-xl bg-[#15499F] text-white text-xs font-bold shrink-0" data-i18n="sendBtn">পাঠান</button>
+            </form>
+          </div>
+
+          <div id="messages-list" class="space-y-2.5"></div>
+        </section>
+
+        <!-- ==================== SETTINGS VIEW ==================== -->
+        <section id="view-settings" class="app-view space-y-3 hidden fade-in">
+          <!-- Society Name, Country, Currency, Logo & Aims -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
+            <h2 class="text-base font-bold text-slate-800 mb-3" data-i18n="societySettingsTitle">সমিতির নাম, দেশ, মুদ্রা, লোগো ও লক্ষ্য</h2>
+            <form onsubmit="handleSaveSocietySettings(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="societyNameLabel">সমিতির নাম (যেকোনো সময় পরিবর্তন করুন) *</label>
+                <input id="set-society-name" type="text" required class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none focus:ring-2 focus:ring-[#15499F]" />
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">পরিচালনাকারী দেশ</label>
+                  <select id="set-country" class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white outline-none"></select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">মূল মুদ্রা (Currency)</label>
+                  <select id="set-currency" class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white outline-none"></select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="societyLogoLabel">সমিতির লোগো (পরে যেকোনো সময় সেট/পরিবর্তন করুন)</label>
+                <div class="flex items-center gap-3">
+                  <img id="set-logo-preview" src="" alt="Preview" class="w-12 h-12 rounded-full object-cover border border-slate-200 bg-slate-50 hidden" />
+                  <div id="set-logo-empty" class="w-12 h-12 rounded-full bg-blue-50 text-[#15499F] flex items-center justify-center border border-blue-100">
+                    <i data-lucide="image" class="w-5 h-5"></i>
+                  </div>
+                  <label class="px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#15499F] text-xs font-bold cursor-pointer">
+                    <span data-i18n="chooseLogo">লোগো ছবি নির্বাচন</span>
+                    <input type="file" accept="image/*" onchange="handleLogoFileChange(this)" class="hidden" />
+                  </label>
+                  <button type="button" onclick="clearSocietyLogo()" class="text-xs text-rose-600 font-semibold hover:underline" data-i18n="removeLogo">মুছুন</button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="societyAimsLabel">সমিতির লক্ষ্য ও উদ্দেশ্য</label>
+                <textarea id="set-society-aims" rows="3" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-[#15499F]"></textarea>
+              </div>
+
+              <button type="submit" class="w-full py-2.5 rounded-xl bg-[#15499F] hover:bg-[#0f3678] text-white font-bold text-sm shadow transition" data-i18n="saveSettings">
+                সেটিংস সংরক্ষণ করুন
+              </button>
+            </form>
+          </div>
+
+          <!-- Admin Profile & Role Management -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-slate-800" data-i18n="adminAndRolesTitle">অ্যাডমিন তথ্য ও ক্যাশিয়ার/সহ-অ্যাডমিন সেট</h3>
+              <button type="button" onclick="openProfileModal()" class="text-xs font-bold text-[#15499F] hover:underline" data-i18n="editMyInfo">নিজের তথ্য এডিট</button>
+            </div>
+            <div id="role-assignment-list" class="space-y-2"></div>
+          </div>
+
+          <!-- Offline-First & Cloud Sync Configuration Panel -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm font-bold text-slate-800" data-i18n="cloudSyncTitle">অফলাইন-ফার্স্ট ও ক্লাউড সিংক (Cloud Sync)</h3>
+                <p class="text-[11px] text-slate-500" data-i18n="cloudSyncSub">অফলাইনে কাজ জমে থাকবে, অনলাইন হলে বা Sync Now চাপলে ক্লাউডে সিংক হবে</p>
+              </div>
+              <span id="set-net-status-pill" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 shrink-0">Online</span>
+            </div>
+
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/70 text-xs space-y-1">
+              <div class="flex justify-between">
+                <span class="text-slate-500" data-i18n="pendingQueueLabel">অপেক্ষমাণ অফলাইন কিউ (Queue):</span>
+                <span id="set-pending-count" class="font-bold text-amber-700">0</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500" data-i18n="lastSyncedLabel">সর্বশেষ সিংক (Last Synced):</span>
+                <span id="set-last-synced" class="font-semibold text-slate-800">—</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500" data-i18n="syncEngineStateLabel">সিংক ইঞ্জিন অবস্থা:</span>
+                <span id="set-sync-health" class="font-semibold text-[#15499F]">Ready</span>
+              </div>
+            </div>
+
+            <form onsubmit="handleSaveCloudConfig(event)" class="space-y-2.5">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="cloudModeLabel">ক্লাউড মোড (Cloud Mode)</label>
+                <select id="cloud-mode-select" onchange="toggleCloudCustomFields()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white outline-none">
+                  <option value="SIMULATED">Built-in Simulated Cloud Engine (তাৎক্ষণিক প্রস্তুত)</option>
+                  <option value="CUSTOM_API">Custom Cloud REST API / Webhook / Firebase Endpoint</option>
+                </select>
+              </div>
+
+              <div class="flex items-center justify-between bg-blue-50/70 px-3 py-2 rounded-xl border border-blue-100">
+                <span class="text-xs font-semibold text-slate-700" data-i18n="autoSyncLabel">অনলাইন হলে অটো-সিংক (Auto-Sync)</span>
+                <input id="cloud-auto-sync" type="checkbox" checked class="w-4 h-4 accent-[#15499F]" />
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="workspaceKeyLabel">ক্লাউড ওয়ার্কস্পেস / সমিতি আইডি (Workspace ID)</label>
+                <input id="cloud-workspace-id" type="text" placeholder="যেমন: samity-global-01" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono outline-none" />
+              </div>
+
+              <div id="cloud-custom-fields" class="space-y-2.5 hidden pt-1 border-t border-slate-100">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="cloudEndpointLabel">Cloud Endpoint URL (REST / Firebase / Webhook)</label>
+                  <input id="cloud-endpoint-url" type="url" placeholder="https://your-api.example.com/samity-sync" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono outline-none" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="cloudApiKeyLabel">API Key / Auth Bearer Token (ঐচ্ছিক)</label>
+                  <input id="cloud-api-key" type="password" placeholder="Bearer token বা x-api-key" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono outline-none" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 pt-1">
+                <button type="submit" class="py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs transition" data-i18n="saveCloudConfig">
+                  ক্লাউড সেটিংস সেভ
+                </button>
+                <button type="button" onclick="triggerCloudSync(true)" class="py-2 rounded-xl bg-[#15499F] hover:bg-[#0f3678] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition" data-i18n="syncNow">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Sync Now
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Reset to Zero -->
+          <div id="reset-box" class="bg-rose-50 rounded-2xl p-4 border border-rose-200 space-y-2">
+            <h3 class="text-sm font-bold text-rose-800" data-i18n="resetSystemTitle">সকল হিসাব শূন্য (0.00) থেকে শুরু করুন</h3>
+            <p class="text-xs text-rose-700" data-i18n="resetSystemDesc">সকল লেনদেন, লোন, সদস্য ও ডাটা মুছে একদম শূন্য থেকে নতুনভাবে শুরু করতে নিচের বাটনে চাপুন।</p>
+            <button type="button" onclick="confirmResetAll()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow transition" data-i18n="resetBtn">
+              সব ডাটা রিসেট করুন
+            </button>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Bottom Android-Style Royal Blue Navigation Bar -->
+      <nav class="bg-[#15499F] h-12 px-5 flex items-center justify-between text-white sticky bottom-0 z-30 shadow-inner no-print">
+        <button type="button" onclick="navigateTo('customers')" class="p-1.5 rounded hover:bg-white/15 transition" title="গ্রাহক">
+          <span class="block w-3.5 h-3.5 border-2 border-white rounded-[2px]"></span>
+        </button>
+        <button type="button" onclick="navigateTo('home')" class="p-1.5 rounded hover:bg-white/15 transition" title="হোম">
+          <span class="block w-4 h-4 border-2 border-white rounded-full"></span>
+        </button>
+        <button type="button" onclick="navigateTo('home')" class="p-1.5 rounded hover:bg-white/15 transition" title="পেছনে / হোম">
+          <i data-lucide="play" class="w-4 h-4 rotate-180 fill-white text-white"></i>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'samabay_samity_global_v2';
+    const CLOUD_MIRROR_PREFIX = 'samabay_cloud_sim_snapshot_';
+    const MEMBER_CAPACITY = 100;
+
+    const COUNTRIES = [
+      { code: 'BD', name: 'বাংলাদেশ (Bangladesh)', dial: '+880', currency: 'BDT' },
+      { code: 'US', name: 'যুক্তরাষ্ট্র / গ্লোবাল (USA / Global)', dial: '+1', currency: 'USD' },
+      { code: 'GB', name: 'যুক্তরাজ্য (United Kingdom)', dial: '+44', currency: 'GBP' },
+      { code: 'EU', name: 'ইউরোপ (Europe / Schengen)', dial: '+49', currency: 'EUR' },
+      { code: 'SA', name: 'সৌদি আরব (Saudi Arabia)', dial: '+966', currency: 'SAR' },
+      { code: 'AE', name: 'সংযুক্ত আরব আমিরাত (UAE / Dubai)', dial: '+971', currency: 'AED' },
+      { code: 'MY', name: 'মালয়েশিয়া (Malaysia)', dial: '+60', currency: 'MYR' },
+      { code: 'SG', name: 'সিঙ্গাপুর (Singapore)', dial: '+65', currency: 'SGD' },
+      { code: 'IN', name: 'ভারত (India)', dial: '+91', currency: 'INR' },
+      { code: 'QA', name: 'কাতার (Qatar)', dial: '+974', currency: 'QAR' },
+      { code: 'KW', name: 'কুয়েত (Kuwait)', dial: '+965', currency: 'KWD' },
+      { code: 'OM', name: 'ওমান (Oman)', dial: '+968', currency: 'OMR' },
+      { code: 'AU', name: 'অস্ট্রেলিয়া (Australia)', dial: '+61', currency: 'AUD' },
+      { code: 'CA', name: 'কানাডা (Canada)', dial: '+1', currency: 'CAD' }
+    ];
+
+    const CURRENCIES = {
+      BDT: { symbol: '৳', code: 'BDT', label: '৳ BDT (বাংলাদেশি টাকা)' },
+      USD: { symbol: '$', code: 'USD', label: '$ USD (US Dollar)' },
+      GBP: { symbol: '£', code: 'GBP', label: '£ GBP (British Pound)' },
+      EUR: { symbol: '€', code: 'EUR', label: '€ EUR (Euro)' },
+      SAR: { symbol: 'ر.س', code: 'SAR', label: 'ر.س SAR (Saudi Riyal)' },
+      AED: { symbol: 'د.إ', code: 'AED', label: 'د.إ AED (UAE Dirham)' },
+      MYR: { symbol: 'RM', code: 'MYR', label: 'RM MYR (Malaysian Ringgit)' },
+      SGD: { symbol: 'S$', code: 'SGD', label: 'S$ SGD (Singapore Dollar)' },
+      INR: { symbol: '₹', code: 'INR', label: '₹ INR (Indian Rupee)' },
+      QAR: { symbol: 'QR', code: 'QAR', label: 'QR QAR (Qatari Riyal)' },
+      KWD: { symbol: 'KD', code: 'KWD', label: 'KD KWD (Kuwaiti Dinar)' },
+      OMR: { symbol: 'OMR', code: 'OMR', label: 'OMR (Omani Rial)' },
+      AUD: { symbol: 'A$', code: 'AUD', label: 'A$ AUD (Australian Dollar)' },
+      CAD: { symbol: 'C$', code: 'CAD', label: 'C$ CAD (Canadian Dollar)' }
+    };
+
+    const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23dbeafe'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%2315499F'/%3E%3Cpath d='M20 88 C20 65, 80 65, 80 88' fill='%2315499F'/%3E%3C/svg%3E";
+    const DEFAULT_SIGN = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 70'%3E%3Crect width='220' height='70' fill='%23f8fafc'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-size='13'%3ESignature / স্বাক্ষর%3C/text%3E%3C/svg%3E";
+
+    const I18N = {
+      bn: {
+        availableBalance: 'উপলব্ধ ব্যালেন্স',
+        currentProfit: 'বর্তমান লাভ',
+        category: 'ক্যাটাগরি',
+        viewAims: 'লক্ষ্য ও উদ্দেশ্য',
+        catReports: 'রিপোর্টস',
+        catCustomers: 'গ্রাহক',
+        catSavings: 'সঞ্চয়',
+        catLoans: 'ঋণ',
+        catSheet: 'আদায় শীট',
+        catColReports: 'আদায় রিপোর্টস',
+        catBanking: 'ব্যাংকিং',
+        catCalculator: 'ঋণ ক্যালকুলেটর',
+        usageStats: 'ব্যবহারের পরিসংখ্যান',
+        customerLimit: 'গ্রাহক সীমা',
+        tierName: 'গ্লোবাল প্রিমিয়াম',
+        usedSuffix: 'ব্যবহৃত',
+        totalCapacitySuffix: 'মোট ধারণক্ষমতা',
+        percentUsedSuffix: '% ব্যবহৃত',
+        leftSuffix: 'বাকি আছে..',
+        utilIncomeExpense: 'আয় ব্যয়',
+        utilMessages: 'বার্তা পাঠান',
+        utilLanguage: 'ভাষা',
+        utilSettings: 'সেটিংস',
+        home: 'হোম / ড্যাশবোর্ড',
+        customers: 'গ্রাহক / সদস্য',
+        savings: 'সঞ্চয় / অনলাইন পেমেন্ট',
+        banking: 'ব্যাংকিং ও পেমেন্ট গেটওয়ে',
+        loans: 'ঋণ আবেদন ও অনুমোদন',
+        messages: 'বার্তা পাঠান',
+        myProfile: 'আমার প্রোফাইল এডিট',
+        settings: 'সেটিংস',
+        quickSwitch: 'দ্রুত একাউন্ট পরিবর্তন',
+        logout: 'লগআউট করুন',
+        customersTitle: 'গ্রাহক / সদস্য তালিকা',
+        customersSub: 'দেশি ও প্রবাসী সদস্যদের তথ্য, ছবি ও স্বাক্ষর',
+        addMember: 'নতুন সদস্য',
+        selectMember: 'সদস্য নির্বাচন করুন *',
+        receivingAccountsTitle: 'সমিতির অনলাইন ব্যাংক ও পেমেন্ট একাউন্টসমূহ',
+        manageBanks: 'ব্যাংক দেখুন',
+        collectionTitle: 'সঞ্চয় / চাঁদা ও কিস্তি পরিশোধ (যেকোনো দেশ থেকে)',
+        month: 'মাসের নাম *',
+        year: 'সাল *',
+        payType: 'ধরন (চাঁদা/কিস্তি/সঞ্চয়) *',
+        amount: 'টাকার পরিমাণ',
+        senderCountry: 'প্রেরকের দেশ *',
+        paymentMethod: 'অনলাইন পেমেন্ট মাধ্যম *',
+        trxRef: 'ট্রানজেকশন আইডি / ব্যাংক রেফারেন্স নং *',
+        submitPayment: 'অনলাইন পেমেন্ট জমা দিন',
+        recentPayments: 'অনলাইন পেমেন্ট ভেরিফিকেশন ও তালিকা',
+        bankSetupTitle: 'সমিতির ব্যাংক ও আন্তর্জাতিক পেমেন্ট গেটওয়ে সেটআপ',
+        bankSetupSub: 'যেকোনো দেশ থেকে সদস্যরা এই অ্যাকাউন্টগুলোতে অনলাইন পেমেন্ট করতে পারবেন',
+        bankingTitle: 'ব্যাংকিং লেনদেন (জমা / উত্তোলন)',
+        bankName: 'ব্যাংক বা গেটওয়ের নাম *',
+        bankAction: 'ধরন *',
+        recordBankTx: 'ব্যাংক লেনদেন রেকর্ড করুন',
+        loanApplyTitle: 'ঋণ / লোন আবেদন',
+        loanApplySub: 'অ্যাডমিন অনুমোদন করলে ক্যাশিয়ারের কাছে স্বয়ংক্রিয় বার্তা যাবে',
+        loanAmount: 'লোনের পরিমাণ',
+        installmentCount: 'কিস্তির সংখ্যা *',
+        loanPurpose: 'লোনের উদ্দেশ্য *',
+        submitLoan: 'লোন আবেদন পাঠান',
+        loanListTitle: 'লোন আবেদন ও অনুমোদন তালিকা',
+        ledgerTitle: 'আয় ব্যয় হিসাব',
+        entryType: 'ধরন *',
+        categoryNote: 'খাত ও বিবরণ *',
+        saveLedger: 'হিসাব সংরক্ষণ করুন',
+        ledgerHistory: 'আয়-ব্যয়ের খতিয়ান',
+        collectionSheetHeading: 'সদস্যভিত্তিক আদায় শীট',
+        messagesTitle: 'বার্তা পাঠান ও ক্যাশিয়ার ইনবক্স',
+        messagesSub: 'লোন অনুমোদন ও পেমেন্ট বার্তা ক্যাশিয়ারের কাছে আসে',
+        markRead: 'সব পঠিত',
+        sendBtn: 'পাঠান',
+        societySettingsTitle: 'সমিতির নাম, দেশ, মুদ্রা, লোগো ও লক্ষ্য',
+        societyNameLabel: 'সমিতির নাম (যেকোনো সময় পরিবর্তন করুন) *',
+        societyLogoLabel: 'সমিতির লোগো (পরে যেকোনো সময় সেট/পরিবর্তন করুন)',
+        chooseLogo: 'লোগো ছবি নির্বাচন',
+        removeLogo: 'মুছুন',
+        societyAimsLabel: 'সমিতির লক্ষ্য ও উদ্দেশ্য',
+        saveSettings: 'সেটিংস সংরক্ষণ করুন',
+        adminAndRolesTitle: 'অ্যাডমিন তথ্য ও ক্যাশিয়ার/সহ-অ্যাডমিন সেট',
+        editMyInfo: 'নিজের তথ্য এডিট',
+        cloudSyncTitle: 'অফলাইন-ফার্স্ট ও ক্লাউড সিংক (Cloud Sync)',
+        cloudSyncSub: 'অফলাইনে কাজ জমে থাকবে, অনলাইন হলে বা Sync Now চাপলে ক্লাউডে সিংক হবে',
+        pendingQueueLabel: 'অপেক্ষমাণ অফলাইন কিউ (Queue):',
+        lastSyncedLabel: 'সর্বশেষ সিংক (Last Synced):',
+        syncEngineStateLabel: 'সিংক ইঞ্জিন অবস্থা:',
+        cloudModeLabel: 'ক্লাউড মোড (Cloud Mode)',
+        autoSyncLabel: 'অনলাইন হলে অটো-সিংক (Auto-Sync)',
+        workspaceKeyLabel: 'ক্লাউড ওয়ার্কস্পেস / সমিতি আইডি (Workspace ID)',
+        cloudEndpointLabel: 'Cloud Endpoint URL (REST / Firebase / Webhook)',
+        cloudApiKeyLabel: 'API Key / Auth Bearer Token (ঐচ্ছিক)',
+        saveCloudConfig: 'ক্লাউড সেটিংস সেভ',
+        syncNow: 'Sync Now',
+        resetSystemTitle: 'সকল হিসাব শূন্য (0.00) থেকে শুরু করুন',
+        resetSystemDesc: 'সকল লেনদেন, লোন, সদস্য ও ডাটা মুছে একদম শূন্য থেকে নতুনভাবে শুরু করতে নিচের বাটনে চাপুন।',
+        resetBtn: 'সব ডাটা রিসেট করুন'
+      },
+      en: {
+        availableBalance: 'Available Balance',
+        currentProfit: 'Current Profit',
+        category: 'Category',
+        viewAims: 'Mission & Aims',
+        catReports: 'Reports',
+        catCustomers: 'Members',
+        catSavings: 'Savings',
+        catLoans: 'Loans',
+        catSheet: 'Collection Sheet',
+        catColReports: 'Col. Reports',
+        catBanking: 'Banking',
+        catCalculator: 'Loan Calc',
+        usageStats: 'Usage Statistics',
+        customerLimit: 'Member Limit',
+        tierName: 'Global Premium',
+        usedSuffix: 'Used',
+        totalCapacitySuffix: 'Total Capacity',
+        percentUsedSuffix: '% Used',
+        leftSuffix: 'Remaining..',
+        utilIncomeExpense: 'Income/Exp',
+        utilMessages: 'Messages',
+        utilLanguage: 'Language',
+        utilSettings: 'Settings',
+        home: 'Home / Dashboard',
+        customers: 'Members Directory',
+        savings: 'Savings & Online Pay',
+        banking: 'Banking & Gateways',
+        loans: 'Loan Application',
+        messages: 'Messages',
+        myProfile: 'Edit My Profile',
+        settings: 'Settings',
+        quickSwitch: 'Quick Switch Account',
+        logout: 'Logout',
+        customersTitle: 'Global Members Directory',
+        customersSub: 'Local & international members, photo & signature',
+        addMember: 'Add Member',
+        selectMember: 'Select Member *',
+        receivingAccountsTitle: 'Society Online Bank & Payment Accounts',
+        manageBanks: 'View Banks',
+        collectionTitle: 'Online Payment (From Any Country)',
+        month: 'Month *',
+        year: 'Year *',
+        payType: 'Payment Type *',
+        amount: 'Amount',
+        senderCountry: 'Sender Country *',
+        paymentMethod: 'Online Payment Method *',
+        trxRef: 'Transaction ID / Bank Reference *',
+        submitPayment: 'Submit Online Payment',
+        recentPayments: 'Payment Verification & History',
+        bankSetupTitle: 'Society Bank & International Payment Gateways',
+        bankSetupSub: 'Members from any country can transfer funds to these accounts',
+        bankingTitle: 'Banking Deposit / Withdraw',
+        bankName: 'Bank / Gateway Name *',
+        bankAction: 'Type *',
+        recordBankTx: 'Record Transaction',
+        loanApplyTitle: 'Loan Application',
+        loanApplySub: 'Approved loans automatically send a message to Cashier',
+        loanAmount: 'Loan Amount',
+        installmentCount: 'Installments *',
+        loanPurpose: 'Purpose *',
+        submitLoan: 'Apply for Loan',
+        loanListTitle: 'Loan Requests & Approvals',
+        ledgerTitle: 'Income & Expense Ledger',
+        entryType: 'Type *',
+        categoryNote: 'Category & Note *',
+        saveLedger: 'Save Entry',
+        ledgerHistory: 'Income & Expense History',
+        collectionSheetHeading: 'Member Collection Sheet',
+        messagesTitle: 'Messages & Cashier Inbox',
+        messagesSub: 'Loan approvals & payment alerts arrive here',
+        markRead: 'Mark All Read',
+        sendBtn: 'Send',
+        societySettingsTitle: 'Samity Name, Country, Currency, Logo & Aims',
+        societyNameLabel: 'Samity Name (Editable anytime) *',
+        societyLogoLabel: 'Samity Logo (Set or change anytime)',
+        chooseLogo: 'Choose Logo',
+        removeLogo: 'Remove',
+        societyAimsLabel: 'Samity Mission & Aims',
+        saveSettings: 'Save Settings',
+        adminAndRolesTitle: 'Admin Profile & Role Assignment',
+        editMyInfo: 'Edit My Info',
+        cloudSyncTitle: 'Offline-First & Cloud Sync',
+        cloudSyncSub: 'Changes queue safely offline and sync automatically or via Sync Now',
+        pendingQueueLabel: 'Pending Offline Queue:',
+        lastSyncedLabel: 'Last Synced:',
+        syncEngineStateLabel: 'Sync Engine Status:',
+        cloudModeLabel: 'Cloud Mode',
+        autoSyncLabel: 'Auto-Sync When Online',
+        workspaceKeyLabel: 'Cloud Workspace / Samity ID',
+        cloudEndpointLabel: 'Cloud Endpoint URL (REST / Firebase / Webhook)',
+        cloudApiKeyLabel: 'API Key / Auth Bearer Token (Optional)',
+        saveCloudConfig: 'Save Cloud Config',
+        syncNow: 'Sync Now',
+        resetSystemTitle: 'Reset Everything to Zero (0.00)',
+        resetSystemDesc: 'Clear all transactions, loans, members, and data to start fresh from zero.',
+        resetBtn: 'Reset All Data'
+      }
+    };
+
+    function createInitialState() {
+      return {
+        lang: 'bn',
+        settings: {
+          societyName: 'নব আলো সমবায় সমিতি',
+          country: 'BD',
+          currency: 'BDT',
+          logo: '',
+          aims: 'দেশ-বিদেশে অবস্থানরত সকল সদস্যদের নিয়মিত সঞ্চয়, স্বচ্ছ ডিজিটাল হিসাবরক্ষণ, সহজ ঋণ সুবিধা ও পারস্পরিক সহযোগিতার মাধ্যমে একটি আদর্শ সমবায় গড়ে তোলা।'
+        },
+        cloudConfig: {
+          mode: 'SIMULATED', // 'SIMULATED' | 'CUSTOM_API'
+          autoSync: true,
+          workspaceId: 'samity-default-workspace',
+          endpointUrl: '',
+          apiKey: '',
+          lastSyncedAt: null,
+          lastSyncStatus: 'Ready',
+          updatedAt: new Date().toISOString()
+        },
+        offlineQueue: [],
+        users: [],
+        currentUserId: null,
+        societyAccounts: [],
+        payments: [],
+        loans: [],
+        ledger: [],
+        bankTransactions: [],
+        messages: [],
+        activeView: 'home',
+        pendingOtp: null
+      };
+    }
+
+    let state = loadState();
+    let signPadCtx = null;
+    let isDrawingSign = false;
+    let isSyncingNow = false;
+
+    function isBrowserOnline() {
+      return typeof navigator === 'undefined' ? true : Boolean(navigator.onLine);
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return createInitialState();
+        const parsed = JSON.parse(raw);
+        const base = createInitialState();
+        return {
+          ...base,
+          ...parsed,
+          settings: { ...base.settings, ...(parsed.settings || {}) },
+          cloudConfig: { ...base.cloudConfig, ...(parsed.cloudConfig || {}) },
+          offlineQueue: Array.isArray(parsed.offlineQueue) ? parsed.offlineQueue : []
+        };
+      } catch (err) {
+        return createInitialState();
+      }
+    }
+
+    function saveState(options = {}) {
+      const { skipQueue = false, queueAction = 'STATE_UPDATE', queuePayload = null } = options;
+      state.cloudConfig.updatedAt = new Date().toISOString();
+
+      if (!skipQueue) {
+        const opId = 'OP-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+        state.offlineQueue.push({
+          opId,
+          action: queueAction,
+          payload: queuePayload,
+          queuedAt: new Date().toISOString(),
+          onlineAtQueueTime: isBrowserOnline()
+        });
+      }
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (err) {
+        showToast('স্টোরেজ সীমা পূর্ণ হয়েছে; অনুগ্রহ করে ছোট সাইজের ছবি দিন।', 'error');
+      }
+
+      renderSyncIndicators();
+
+      if (!skipQueue && isBrowserOnline() && state.cloudConfig.autoSync && !isSyncingNow) {
+        setTimeout(() => {
+          triggerCloudSync(false);
+        }, 120);
+      }
+    }
+
+    function getSimulatedCloudKey() {
+      const ws = (state.cloudConfig.workspaceId || 'samity-default-workspace').trim();
+      return `${CLOUD_MIRROR_PREFIX}${ws}`;
+    }
+
+    function mergeByIdWithTimestamp(localArr, remoteArr) {
+      const map = new Map();
+      (Array.isArray(remoteArr) ? remoteArr : []).forEach(item => {
+        if (item && item.id) map.set(item.id, item);
+      });
+      (Array.isArray(localArr) ? localArr : []).forEach(item => {
+        if (!item || !item.id) return;
+        const prev = map.get(item.id);
+        if (!prev) {
+          map.set(item.id, item);
+        } else {
+          const prevTs = new Date(prev.updatedAt || prev.date || 0).getTime() || 0;
+          const nextTs = new Date(item.updatedAt || item.date || 0).getTime() || 0;
+          map.set(item.id, nextTs >= prevTs ? { ...prev, ...item } : { ...item, ...prev });
+        }
+      });
+      return Array.from(map.values());
+    }
+
+    function buildCloudSnapshotPayload() {
+      return {
+        workspaceId: state.cloudConfig.workspaceId || 'samity-default-workspace',
+        syncedAt: new Date().toISOString(),
+        pendingOperationsCount: state.offlineQueue.length,
+        data: {
+          settings: state.settings,
+          users: state.users,
+          societyAccounts: state.societyAccounts,
+          payments: state.payments,
+          loans: state.loans,
+          ledger: state.ledger,
+          bankTransactions: state.bankTransactions,
+          messages: state.messages
+        }
+      };
+    }
+
+    async function pushAndPullCloudSnapshot(payload) {
+      if (state.cloudConfig.mode === 'CUSTOM_API' && state.cloudConfig.endpointUrl) {
+        const headers = { 'Content-Type': 'application/json' };
+        if (state.cloudConfig.apiKey) {
+          headers['Authorization'] = state.cloudConfig.apiKey.startsWith('Bearer ')
+            ? state.cloudConfig.apiKey
+            : `Bearer ${state.cloudConfig.apiKey}`;
+          headers['x-api-key'] = state.cloudConfig.apiKey;
+        }
+        const response = await fetch(state.cloudConfig.endpointUrl, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+          throw new Error(`Cloud HTTP ${response.status}`);
+        }
+        let remoteJson = null;
+        try {
+          remoteJson = await response.json();
+        } catch (_) {
+          remoteJson = null;
+        }
+        return remoteJson && remoteJson.data ? remoteJson.data : null;
+      }
+
+      // Built-in Simulated Cloud Engine (works immediately with zero external setup)
+      await new Promise(resolve => setTimeout(resolve, 260));
+      const cloudKey = getSimulatedCloudKey();
+      const existingRaw = localStorage.getItem(cloudKey);
+      let cloudRecord = null;
+      if (existingRaw) {
+        try {
+          cloudRecord = JSON.parse(existingRaw);
+        } catch (_) {
+          cloudRecord = null;
+        }
+      }
+
+      const mergedData = {
+        settings: {
+          ...(cloudRecord && cloudRecord.data ? cloudRecord.data.settings : {}),
+          ...payload.data.settings
+        },
+        users: mergeByIdWithTimestamp(payload.data.users, cloudRecord && cloudRecord.data ? cloudRecord.data.users : []),
+        societyAccounts: mergeByIdWithTimestamp(payload.data.societyAccounts, cloudRecord && cloudRecord.data ? cloudRecord.data.societyAccounts : []),
+        payments: mergeByIdWithTimestamp(payload.data.payments, cloudRecord && cloudRecord.data ? cloudRecord.data.payments : []),
+        loans: mergeByIdWithTimestamp(payload.data.loans, cloudRecord && cloudRecord.data ? cloudRecord.data.loans : []),
+        ledger: mergeByIdWithTimestamp(payload.data.ledger, cloudRecord && cloudRecord.data ? cloudRecord.data.ledger : []),
+        bankTransactions: mergeByIdWithTimestamp(payload.data.bankTransactions, cloudRecord && cloudRecord.data ? cloudRecord.data.bankTransactions : []),
+        messages: mergeByIdWithTimestamp(payload.data.messages, cloudRecord && cloudRecord.data ? cloudRecord.data.messages : [])
+      };
+
+      localStorage.setItem(cloudKey, JSON.stringify({
+        workspaceId: payload.workspaceId,
+        syncedAt: payload.syncedAt,
+        data: mergedData
+      }));
+
+      return mergedData;
+    }
+
+    async function triggerCloudSync(showFeedback = true) {
+      if (isSyncingNow) return;
+
+      if (!isBrowserOnline()) {
+        state.cloudConfig.lastSyncStatus = 'Offline (Queued)';
+        renderSyncIndicators();
+        if (showFeedback) {
+          showToast(`আপনি বর্তমানে অফলাইনে আছেন। ${fmtCount(state.offlineQueue.length)}টি কাজ কিউতে জমা আছে; অনলাইন হলে সিংক হবে।`, 'info');
+        }
+        return;
+      }
+
+      isSyncingNow = true;
+      state.cloudConfig.lastSyncStatus = 'Syncing...';
+      renderSyncIndicators();
+
+      try {
+        const payload = buildCloudSnapshotPayload();
+        const remoteData = await pushAndPullCloudSnapshot(payload);
+
+        if (remoteData) {
+          if (remoteData.settings) {
+            state.settings = { ...remoteData.settings, ...state.settings };
+          }
+          state.users = mergeByIdWithTimestamp(state.users, remoteData.users);
+          state.societyAccounts = mergeByIdWithTimestamp(state.societyAccounts, remoteData.societyAccounts);
+          state.payments = mergeByIdWithTimestamp(state.payments, remoteData.payments);
+          state.loans = mergeByIdWithTimestamp(state.loans, remoteData.loans);
+          state.ledger = mergeByIdWithTimestamp(state.ledger, remoteData.ledger);
+          state.bankTransactions = mergeByIdWithTimestamp(state.bankTransactions, remoteData.bankTransactions);
+          state.messages = mergeByIdWithTimestamp(state.messages, remoteData.messages);
+        }
+
+        const syncedCount = state.offlineQueue.length;
+        state.offlineQueue = [];
+        state.cloudConfig.lastSyncedAt = new Date().toISOString();
+        state.cloudConfig.lastSyncStatus = state.cloudConfig.mode === 'CUSTOM_API' ? 'Cloud API Synced' : 'Simulated Cloud Synced';
+        saveState({ skipQueue: true });
+
+        if (showFeedback) {
+          showToast(
+            syncedCount > 0
+              ? `ক্লাউড সিংক সফল হয়েছে! (${fmtCount(syncedCount)}টি কিউড অপারেশন সিংক করা হয়েছে)`
+              : 'ক্লাউড সিংক আপ-টু-ডেট আছে!'
+          );
+        }
+        renderApp();
+      } catch (err) {
+        state.cloudConfig.lastSyncStatus = 'Sync Retry Pending';
+        saveState({ skipQueue: true });
+        if (showFeedback) {
+          showToast('ক্লাউড সিংক সাময়িক ব্যর্থ হয়েছে; ডাটা লোকালি সুরক্ষিত আছে এবং পরে পুনরায় সিংক হবে।', 'error');
+        }
+      } finally {
+        isSyncingNow = false;
+        renderSyncIndicators();
+      }
+    }
+
+    function formatLastSyncedLabel() {
+      const ts = state.cloudConfig.lastSyncedAt;
+      if (!ts) {
+        return state.lang === 'bn' ? 'এখনো সিংক হয়নি' : 'Not synced yet';
+      }
+      const d = new Date(ts);
+      if (Number.isNaN(d.getTime())) return String(ts);
+      return state.lang === 'bn' ? d.toLocaleString('bn-BD') : d.toLocaleString();
+    }
+
+    function renderSyncIndicators() {
+      const online = isBrowserOnline();
+      const qCount = state.offlineQueue.length;
+      const lastSyncStr = formatLastSyncedLabel();
+
+      const pill = document.getElementById('header-sync-pill');
+      const dot = document.getElementById('header-sync-dot');
+      const txt = document.getElementById('header-sync-text');
+
+      if (pill && dot && txt) {
+        if (isSyncingNow) {
+          txt.innerText = 'Syncing...';
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-300 animate-ping';
+        } else if (!online) {
+          txt.innerText = `Offline (${qCount})`;
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-300';
+        } else if (qCount > 0) {
+          txt.innerText = `Pending (${qCount})`;
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-300';
+        } else {
+          txt.innerText = 'Cloud Synced';
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-300';
+        }
+      }
+
+      const netBadge = document.getElementById('home-net-badge');
+      const queueBadge = document.getElementById('home-queue-badge');
+      const lastSyncEl = document.getElementById('home-last-sync-text');
+
+      if (netBadge) {
+        netBadge.innerText = online ? 'Online' : 'Offline';
+        netBadge.className = online
+          ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800'
+          : 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800';
+      }
+      if (queueBadge) {
+        queueBadge.innerText = `Queue: ${fmtCount(qCount)}`;
+        queueBadge.className = qCount > 0
+          ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800'
+          : 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700';
+      }
+      if (lastSyncEl) {
+        lastSyncEl.innerText = `Last Sync: ${lastSyncStr}`;
+      }
+
+      const setNetPill = document.getElementById('set-net-status-pill');
+      const setPending = document.getElementById('set-pending-count');
+      const setLastSynced = document.getElementById('set-last-synced');
+      const setHealth = document.getElementById('set-sync-health');
+
+      if (setNetPill) {
+        setNetPill.innerText = online ? 'Online' : 'Offline';
+        setNetPill.className = online
+          ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 shrink-0'
+          : 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 shrink-0';
+      }
+      if (setPending) setPending.innerText = fmtCount(qCount);
+      if (setLastSynced) setLastSynced.innerText = lastSyncStr;
+      if (setHealth) setHealth.innerText = state.cloudConfig.lastSyncStatus || 'Ready';
+    }
+
+    function toggleCloudCustomFields() {
+      const modeEl = document.getElementById('cloud-mode-select');
+      const customBox = document.getElementById('cloud-custom-fields');
+      if (!modeEl || !customBox) return;
+      customBox.classList.toggle('hidden', modeEl.value !== 'CUSTOM_API');
+    }
+
+    function handleSaveCloudConfig(e) {
+      e.preventDefault();
+      state.cloudConfig.mode = document.getElementById('cloud-mode-select').value;
+      state.cloudConfig.autoSync = document.getElementById('cloud-auto-sync').checked;
+      state.cloudConfig.workspaceId = (document.getElementById('cloud-workspace-id').value || 'samity-default-workspace').trim();
+      state.cloudConfig.endpointUrl = (document.getElementById('cloud-endpoint-url').value || '').trim();
+      state.cloudConfig.apiKey = (document.getElementById('cloud-api-key').value || '').trim();
+
+      saveState({ queueAction: 'CLOUD_CONFIG_UPDATE' });
+      showToast('ক্লাউড সিংক সেটিংস সংরক্ষণ হয়েছে!');
+      if (isBrowserOnline()) {
+        triggerCloudSync(false);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (err) {
+        showToast('স্টোরেজ সীমা পূর্ণ হয়েছে; অনুগ্রহ করে ছোট সাইজের ছবি দিন।', 'error');
+      }
+    }
+
+    function getCurrencyObj() {
+      return CURRENCIES[state.settings.currency] || CURRENCIES.BDT;
+    }
+
+    function getCountryObj(code) {
+      return COUNTRIES.find(c => c.code === code) || COUNTRIES[0];
+    }
+
+    function toBnNum(val) {
+      const map = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+      return String(val).replace(/\d/g, d => map[d]);
+    }
+
+    function formatMoney(amount) {
+      const curr = getCurrencyObj();
+      const n = Number(amount || 0);
+      const fixed = n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const formattedNum = state.lang === 'bn' ? toBnNum(fixed) : fixed;
+      return `${curr.symbol} ${formattedNum}`;
+    }
+
+    function fmtCount(num) {
+      return state.lang === 'bn' ? toBnNum(num) : String(num);
+    }
+
+    function getCurrentUser() {
+      return state.users.find(u => u.id === state.currentUserId) || null;
+    }
+
+    function isAdmin(user) {
+      return user && (user.role === 'MAIN_ADMIN' || user.role === 'CO_ADMIN');
+    }
+
+    function getRoleLabel(role) {
+      if (role === 'MAIN_ADMIN') return state.lang === 'bn' ? 'প্রধান অ্যাডমিন' : 'Main Admin';
+      if (role === 'CO_ADMIN') return state.lang === 'bn' ? 'সহ-অ্যাডমিন' : 'Co-Admin';
+      if (role === 'CASHIER') return state.lang === 'bn' ? 'ক্যাশিয়ার' : 'Cashier';
+      return state.lang === 'bn' ? 'সদস্য / গ্রাহক' : 'Member';
+    }
+
+    function showToast(msg, variant = 'success', ms = 4200) {
+      const container = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      const palette = {
+        success: 'bg-slate-900 text-white border-emerald-500',
+        error: 'bg-rose-950 text-white border-rose-500',
+        info: 'bg-[#15499F] text-white border-blue-300',
+        sms: 'bg-amber-950 text-amber-50 border-amber-400 ring-2 ring-amber-300/50'
+      };
+      el.className = `pointer-events-auto px-4 py-3 rounded-2xl border shadow-xl text-xs sm:text-sm leading-snug fade-in ${palette[variant] || palette.info}`;
+      el.innerHTML = msg;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => el.remove(), 250);
+      }, ms);
+    }
+
+    function openModal(title, bodyHtml, footerHtml = '') {
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-body').innerHTML = bodyHtml;
+      document.getElementById('modal-footer').innerHTML = footerHtml || `<button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-[#15499F] text-white text-xs font-bold">ঠিক আছে</button>`;
+      const backdrop = document.getElementById('modal-backdrop');
+      backdrop.classList.remove('hidden');
+      backdrop.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeModal() {
+      const backdrop = document.getElementById('modal-backdrop');
+      backdrop.classList.add('hidden');
+      backdrop.classList.remove('flex');
+    }
+
+    function compressImageFile(file, maxSize, callback) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width;
+          let h = img.height;
+          if (w > maxSize || h > maxSize) {
+            if (w > h) {
+              h = Math.round((h * maxSize) / w);
+              w = maxSize;
+            } else {
+              w = Math.round((w * maxSize) / h);
+              h = maxSize;
+            }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          callback(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ==================== DROPDOWN INITIALIZATION ====================
+    function populateStaticCountryAndCurrencySelects() {
+      const countryOptions = COUNTRIES.map(c => `<option value="${c.code}">${c.name}</option>`).join('');
+      const dialOptions = COUNTRIES.map(c => `<option value="${c.dial}">${c.dial} (${c.code})</option>`).join('');
+      const currOptions = Object.values(CURRENCIES).map(c => `<option value="${c.code}">${c.label}</option>`).join('');
+
+      ['signup-country', 'set-country', 'pay-country'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = countryOptions;
+      });
+
+      ['signup-dial-code', 'login-dial-code', 'otp-dial-code'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = dialOptions;
+      });
+
+      ['signup-currency', 'set-currency'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = currOptions;
+      });
+    }
+
+    function syncSignupCodeWithCountry() {
+      const code = document.getElementById('signup-country').value;
+      const cObj = getCountryObj(code);
+      document.getElementById('signup-dial-code').value = cObj.dial;
+      document.getElementById('signup-currency').value = cObj.currency;
+    }
+
+    function normalizeFullPhone(dialCode, rawNumber) {
+      const clean = rawNumber.trim().replace(/[\s\-()]/g, '');
+      if (clean.startsWith('+')) return clean;
+      const strippedZero = clean.startsWith('0') ? clean.slice(1) : clean;
+      return `${dialCode}${strippedZero}`;
+    }
+
+    // ==================== BRANDING & LANGUAGE ====================
+    function applyBranding() {
+      const name = state.settings.societyName || 'নব আলো সমবায় সমিতি';
+      const countryObj = getCountryObj(state.settings.country);
+      const currObj = getCurrencyObj();
+
+      document.title = name;
+      document.getElementById('auth-society-name').innerText = name;
+      document.getElementById('header-society-name').innerText = name;
+      document.getElementById('header-region-pill').innerText = `${countryObj.name.split('(')[0].trim()} • ${currObj.symbol} ${currObj.code}`;
+      document.getElementById('drawer-country-label').innerText = countryObj.name;
+      document.getElementById('drawer-currency-label').innerText = `${currObj.symbol} ${currObj.code}`;
+
+      document.querySelectorAll('.active-curr-sym').forEach(el => {
+        el.innerText = currObj.symbol;
+      });
+
+      const logo = state.settings.logo;
+      const authImg = document.getElementById('auth-logo-img');
+      const authFallback = document.getElementById('auth-logo-fallback');
+      const headImg = document.getElementById('header-logo-img');
+      const headBadge = document.getElementById('header-logo-badge');
+
+      if (logo) {
+        authImg.src = logo;
+        authImg.classList.remove('hidden');
+        authFallback.classList.add('hidden');
+        headImg.src = logo;
+        headImg.classList.remove('hidden');
+        headBadge.classList.add('hidden');
+      } else {
+        authImg.classList.add('hidden');
+        authFallback.classList.remove('hidden');
+        headImg.classList.add('hidden');
+        headBadge.classList.remove('hidden');
+      }
+    }
+
+    function applyLanguage() {
+      const dict = I18N[state.lang] || I18N.bn;
+      document.getElementById('lbl-available-balance').innerText = dict.availableBalance;
+      document.getElementById('lbl-current-profit').innerText = dict.currentProfit;
+      document.getElementById('lbl-category').innerText = dict.category;
+      document.getElementById('cat-reports').innerText = dict.catReports;
+      document.getElementById('cat-customers').innerText = dict.catCustomers;
+      document.getElementById('cat-savings').innerText = dict.catSavings;
+      document.getElementById('cat-loans').innerText = dict.catLoans;
+      document.getElementById('cat-sheet').innerText = dict.catSheet;
+      document.getElementById('cat-col-reports').innerText = dict.catColReports;
+      document.getElementById('cat-banking').innerText = dict.catBanking;
+      document.getElementById('cat-calculator').innerText = dict.catCalculator;
+      document.getElementById('lbl-usage-stats').innerText = dict.usageStats;
+      document.getElementById('lbl-customer-limit').innerText = dict.customerLimit;
+      document.getElementById('lbl-tier-name').innerText = dict.tierName;
+      document.getElementById('util-income-expense').innerText = dict.utilIncomeExpense;
+      document.getElementById('util-messages').innerText = dict.utilMessages;
+      document.getElementById('util-language').innerText = dict.utilLanguage;
+      document.getElementById('util-settings').innerText = dict.utilSettings;
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.innerText = dict[key];
+      });
+    }
+
+    function toggleLanguage() {
+      state.lang = state.lang === 'bn' ? 'en' : 'bn';
+      saveState();
+      renderApp();
+      showToast(state.lang === 'bn' ? 'ভাষা বাংলা করা হয়েছে' : 'Language switched to English', 'info');
+    }
+
+    function openAimsModal() {
+      openModal(
+        state.lang === 'bn' ? 'সমিতির লক্ষ্য ও উদ্দেশ্য' : 'Samity Mission & Aims',
+        `<div class="p-3 rounded-xl bg-blue-50/70 border border-blue-100 text-xs sm:text-sm leading-relaxed text-slate-700">${state.settings.aims || 'লক্ষ্য ও উদ্দেশ্য সেটিংস থেকে যুক্ত করুন।'}</div>`
+      );
+    }
+
+    // ==================== AUTHENTICATION & INTERNATIONAL OTP ====================
+    function handleMainAdminSignup(e) {
+      e.preventDefault();
+      const societyName = document.getElementById('signup-society-name').value.trim();
+      const country = document.getElementById('signup-country').value;
+      const currency = document.getElementById('signup-currency').value;
+      const name = document.getElementById('signup-admin-name').value.trim();
+      const dial = document.getElementById('signup-dial-code').value;
+      const mobile = normalizeFullPhone(dial, document.getElementById('signup-admin-mobile').value);
+      const password = document.getElementById('signup-admin-password').value;
+
+      state.settings.societyName = societyName || 'নব আলো সমবায় সমিতি';
+      state.settings.country = country;
+      state.settings.currency = currency;
+
+      const mainAdmin = {
+        id: 'USR-' + Date.now(),
+        name,
+        country,
+        mobile,
+        password,
+        role: 'MAIN_ADMIN',
+        fatherName: '',
+        motherName: '',
+        spouseName: '',
+        nomineeName: '',
+        nid: '',
+        photo: DEFAULT_AVATAR,
+        signature: DEFAULT_SIGN
+      };
+
+      state.users = [mainAdmin];
+      state.currentUserId = mainAdmin.id;
+      state.activeView = 'home';
+      saveState();
+      showToast(`${name} — প্রধান অ্যাডমিন হিসেবে গ্লোবাল সেটআপ সম্পন্ন হয়েছে!`);
+      renderApp();
+    }
+
+    function handleSignIn(e) {
+      e.preventDefault();
+      const dial = document.getElementById('login-dial-code').value;
+      const rawNum = document.getElementById('login-mobile').value.trim();
+      const fullPhone = normalizeFullPhone(dial, rawNum);
+      const password = document.getElementById('login-password').value;
+
+      const found = state.users.find(u => (u.mobile === fullPhone || u.mobile === rawNum) && u.password === password);
+      if (!found) {
+        showToast('মোবাইল নাম্বার বা পাসওয়ার্ড সঠিক নয়।', 'error');
+        return;
+      }
+      state.currentUserId = found.id;
+      state.activeView = 'home';
+      saveState();
+      showToast(`স্বাগতম, ${found.name}!`);
+      renderApp();
+    }
+
+    function handleLogout() {
+      state.currentUserId = null;
+      saveState();
+      renderApp();
+    }
+
+    function openForgotOtpView() {
+      document.getElementById('signin-box').classList.add('hidden');
+      document.getElementById('otp-box').classList.remove('hidden');
+      document.getElementById('otp-send-form').classList.remove('hidden');
+      document.getElementById('otp-verify-form').classList.add('hidden');
+    }
+
+    function backToSignIn() {
+      document.getElementById('otp-box').classList.add('hidden');
+      document.getElementById('signin-box').classList.remove('hidden');
+    }
+
+    function handleRequestOtp(e) {
+      e.preventDefault();
+      const dial = document.getElementById('otp-dial-code').value;
+      const rawNum = document.getElementById('otp-mobile-input').value.trim();
+      const fullPhone = normalizeFullPhone(dial, rawNum);
+      const user = state.users.find(u => u.mobile === fullPhone || u.mobile === rawNum);
+      if (!user) {
+        showToast('এই মোবাইল নাম্বারটি নিবন্ধিত নয়।', 'error');
+        return;
+      }
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      state.pendingOtp = { userId: user.id, mobile: user.mobile, code };
+      saveState();
+
+      document.getElementById('otp-send-form').classList.add('hidden');
+      document.getElementById('otp-verify-form').classList.remove('hidden');
+      showToast(
+        `<strong>📱 Global SMS OTP (${user.mobile}):</strong><br>আপনার OTP কোড: <span class="font-mono font-bold text-base underline">${code}</span>`,
+        'sms',
+        10000
+      );
+    }
+
+    function handleResetWithOtp(e) {
+      e.preventDefault();
+      const code = document.getElementById('otp-code-input').value.trim();
+      const newPass = document.getElementById('otp-new-pass-input').value;
+      if (!state.pendingOtp || state.pendingOtp.code !== code) {
+        showToast('ভুল OTP কোড! আবার চেষ্টা করুন।', 'error');
+        return;
+      }
+      const user = state.users.find(u => u.id === state.pendingOtp.userId);
+      if (user) {
+        user.password = newPass;
+        state.pendingOtp = null;
+        saveState();
+        document.getElementById('otp-code-input').value = '';
+        document.getElementById('otp-new-pass-input').value = '';
+        showToast('পাসওয়ার্ড সফলভাবে রিসেট হয়েছে। এখন লগইন করুন।');
+        backToSignIn();
+      }
+    }
+
+    // ==================== DRAWER & NAVIGATION ====================
+    function openDrawer() {
+      document.getElementById('drawer-backdrop').classList.remove('hidden');
+      document.getElementById('side-drawer').classList.remove('-translate-x-full');
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawer-backdrop').classList.add('hidden');
+      document.getElementById('side-drawer').classList.add('-translate-x-full');
+    }
+
+    function navigateTo(viewName) {
+      state.activeView = viewName;
+      saveState();
+      document.querySelectorAll('.app-view').forEach(v => v.classList.add('hidden'));
+      const target = document.getElementById('view-' + viewName);
+      if (target) {
+        target.classList.remove('hidden');
+      } else {
+        document.getElementById('view-home').classList.remove('hidden');
+      }
+      renderSubViews();
+      lucide.createIcons();
+    }
+
+    function switchLoggedInAccount(userId) {
+      if (!userId) return;
+      state.currentUserId = userId;
+      state.activeView = 'home';
+      saveState();
+      closeDrawer();
+      renderApp();
+      showToast('একাউন্ট পরিবর্তন করা হয়েছে।', 'info');
+    }
+
+    // ==================== FINANCIAL METRICS (STRICT ZERO START) ====================
+    function computeMetrics() {
+      let verifiedCollections = 0;
+      let pendingCollections = 0;
+      state.payments.forEach(p => {
+        if (p.status === 'VERIFIED') verifiedCollections += Number(p.amount || 0);
+        if (p.status === 'PENDING') pendingCollections += Number(p.amount || 0);
+      });
+
+      let extraIncome = 0;
+      let expenseTotal = 0;
+      state.ledger.forEach(item => {
+        if (item.type === 'INCOME') extraIncome += Number(item.amount || 0);
+        if (item.type === 'EXPENSE') expenseTotal += Number(item.amount || 0);
+      });
+
+      let loansOut = 0;
+      state.loans.forEach(ln => {
+        if (ln.status === 'APPROVED' || ln.status === 'DISBURSED') {
+          loansOut += Number(ln.amount || 0);
+        }
+      });
+
+      const availableBalance = (verifiedCollections + extraIncome) - (expenseTotal + loansOut);
+      const currentProfit = extraIncome - expenseTotal;
+
+      return {
+        availableBalance,
+        currentProfit,
+        verifiedCollections,
+        pendingCollections,
+        extraIncome,
+        expenseTotal,
+        loansOut
+      };
+    }
+
+    function renderDashboardMetrics() {
+      const m = computeMetrics();
+      document.getElementById('val-available-balance').innerText = formatMoney(m.availableBalance);
+      document.getElementById('val-current-profit').innerText = formatMoney(m.currentProfit);
+
+      const usedCount = state.users.length;
+      const pct = Math.min(100, Math.round((usedCount / MEMBER_CAPACITY) * 100));
+      const remaining = Math.max(0, MEMBER_CAPACITY - usedCount);
+
+      document.getElementById('member-limit-bar').style.width = pct + '%';
+      document.getElementById('member-limit-bar-text').innerText =
+        `${fmtCount(usedCount)} ${I18N[state.lang].usedSuffix} / ${fmtCount(MEMBER_CAPACITY)} ${I18N[state.lang].totalCapacitySuffix}`;
+      document.getElementById('member-percent-used').innerText = `${fmtCount(pct)}${I18N[state.lang].percentUsedSuffix}`;
+      document.getElementById('member-slots-left').innerText = `${fmtCount(remaining)} ${I18N[state.lang].leftSuffix}`;
+
+      const pendingPaymentsCount = state.payments.filter(p => p.status === 'PENDING').length;
+      const pendingAlert = document.getElementById('home-pending-alert');
+      const drawerPendingBadge = document.getElementById('drawer-pending-pay-badge');
+
+      if (pendingPaymentsCount > 0) {
+        pendingAlert.classList.remove('hidden');
+        document.getElementById('home-pending-text').innerText =
+          `${fmtCount(pendingPaymentsCount)}টি অনলাইন পেমেন্ট ভেরিফিকেশনের অপেক্ষায়`;
+        drawerPendingBadge.innerText = fmtCount(pendingPaymentsCount);
+        drawerPendingBadge.classList.remove('hidden');
+      } else {
+        pendingAlert.classList.add('hidden');
+        drawerPendingBadge.classList.add('hidden');
+      }
+
+      const unread = state.messages.filter(msg => !msg.read).length;
+      const hdrDot = document.getElementById('header-notif-dot');
+      const homeBadge = document.getElementById('home-msg-badge');
+      const drawerBadge = document.getElementById('drawer-unread-badge');
+
+      if (unread > 0) {
+        hdrDot.innerText = fmtCount(unread);
+        hdrDot.classList.remove('hidden');
+        homeBadge.innerText = fmtCount(unread);
+        homeBadge.classList.remove('hidden');
+        drawerBadge.innerText = fmtCount(unread);
+        drawerBadge.classList.remove('hidden');
+      } else {
+        hdrDot.classList.add('hidden');
+        homeBadge.classList.add('hidden');
+        drawerBadge.classList.add('hidden');
+      }
+    }
+
+    // ==================== MEMBER MANAGEMENT (GLOBAL + PHOTO + SIGNATURE) ====================
+    function renderCustomersView() {
+      const user = getCurrentUser();
+      const canManage = isAdmin(user);
+      document.getElementById('btn-add-customer').classList.toggle('hidden', !canManage);
+
+      const container = document.getElementById('customers-list');
+      if (state.users.length === 0) {
+        container.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-slate-400">কোনো সদস্য নেই</div>`;
+        return;
+      }
+
+      container.innerHTML = state.users.map(m => {
+        const cObj = getCountryObj(m.country || 'BD');
+        return `
+          <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200/70 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-3 min-w-0">
+                <img src="${m.photo || DEFAULT_AVATAR}" alt="${m.name}" class="w-12 h-12 rounded-full object-cover border border-slate-200 shrink-0" />
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#15499F]">${getRoleLabel(m.role)}</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">${cObj.code}</span>
+                  </div>
+                  <p class="font-bold text-sm text-slate-800 truncate mt-0.5">${m.name}</p>
+                  <p class="text-xs text-slate-500 font-mono">${m.mobile}</p>
+                </div>
+              </div>
+              ${canManage ? `
+                <button type="button" onclick="openMemberModal('${m.id}')" class="px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#15499F] text-xs font-bold shrink-0">
+                  ${state.lang === 'bn' ? 'এডিট' : 'Edit'}
+                </button>
+              ` : ''}
+            </div>
+
+            <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-xl">
+              <div><span class="text-slate-400">পিতা:</span> ${m.fatherName || '—'}</div>
+              <div><span class="text-slate-400">মাতা:</span> ${m.motherName || '—'}</div>
+              <div><span class="text-slate-400">স্বামী/স্ত্রী:</span> ${m.spouseName || '—'}</div>
+              <div><span class="text-slate-400">নমিনি:</span> ${m.nomineeName || '—'}</div>
+              <div class="col-span-2"><span class="text-slate-400">NID / Passport:</span> <span class="font-mono">${m.nid || '—'}</span></div>
+            </div>
+
+            <div class="flex items-center justify-between pt-1 border-t border-slate-100">
+              <span class="text-[11px] text-slate-400">স্বাক্ষর / সাইন:</span>
+              <img src="${m.signature || DEFAULT_SIGN}" alt="Signature" class="h-8 w-24 object-contain border border-slate-100 rounded bg-slate-50 px-1" />
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openMemberModal(memberId) {
+      const existing = memberId ? state.users.find(u => u.id === memberId) : null;
+      const title = existing
+        ? (state.lang === 'bn' ? 'সদস্যের তথ্য ও ছবি এডিট' : 'Edit Member')
+        : (state.lang === 'bn' ? 'নতুন সদস্য যুক্ত করুন' : 'Add New Member');
+
+      const countryOpts = COUNTRIES.map(c =>
+        `<option value="${c.code}" ${(existing ? existing.country : 'BD') === c.code ? 'selected' : ''}>${c.name}</option>`
+      ).join('');
+
+      const bodyHtml = `
+        <form id="member-form" onsubmit="saveMemberFromModal(event, '${memberId || ''}')" class="space-y-2.5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-0.5">সদস্যের নাম *</label>
+              <input id="m-name" type="text" required value="${existing ? existing.name : ''}" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-0.5">সদস্যের দেশ *</label>
+              <select id="m-country" class="w-full px-2.5 py-2 rounded-xl border border-slate-200 text-xs bg-white outline-none">${countryOpts}</select>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-600 mb-0.5">আন্তর্জাতিক মোবাইল নাম্বার (+880, +1, +44, +966, +971...) *</label>
+              <input id="m-mobile" type="tel" required value="${existing ? existing.mobile : '+880'}" placeholder="+8801XXXXXXXXX" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-0.5">পিতার নাম *</label>
+              <input id="m-father" type="text" required value="${existing ? existing.fatherName || '' : ''}" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-0.5">মাতার নাম *</label>
+              <input id="m-mother" type="text" required value="${existing ? existing.motherName || '' : ''}" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-0.5">স্বামীর নাম / স্ত্রীর নাম</label>
+              <input id="m-spouse" type="text" value="${existing ? existing.spouseName || '' : ''}" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-0.5">নমিনির নাম *</label>
+              <input id="m-nominee" type="text" required value="${existing ? existing.nomineeName || '' : ''}" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-0.5">NID / পাসপোর্ট নম্বর *</label>
+              <input id="m-nid" type="text" required value="${existing ? existing.nid || '' : ''}" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-0.5">পাসওয়ার্ড *</label>
+              <input id="m-password" type="text" required minlength="4" value="${existing ? existing.password : '1234'}" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none" />
+            </div>
+          </div>
+
+          ${(!existing || existing.role !== 'MAIN_ADMIN') ? `
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-0.5">ভূমিকা (Role)</label>
+              <select id="m-role" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs outline-none">
+                <option value="MEMBER" ${existing && existing.role === 'MEMBER' ? 'selected' : ''}>সদস্য (Member)</option>
+                <option value="CASHIER" ${existing && existing.role === 'CASHIER' ? 'selected' : ''}>ক্যাশিয়ার (Cashier)</option>
+                <option value="CO_ADMIN" ${existing && existing.role === 'CO_ADMIN' ? 'selected' : ''}>সহ-অ্যাডমিন (Co-Admin)</option>
+              </select>
+            </div>
+          ` : ''}
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/70">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">সদস্যের ছবি</label>
+              <div class="flex items-center gap-2.5">
+                <img id="m-photo-preview" src="${existing ? existing.photo || DEFAULT_AVATAR : DEFAULT_AVATAR}" class="w-12 h-12 rounded-xl object-cover border border-slate-200" />
+                <label class="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold cursor-pointer">
+                  ছবি দিন
+                  <input type="file" accept="image/*" onchange="onMemberPhotoPicked(this)" class="hidden" />
+                </label>
+                <input id="m-photo-data" type="hidden" value="${existing ? existing.photo || DEFAULT_AVATAR : DEFAULT_AVATAR}" />
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200/70">
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-xs font-semibold text-slate-600">স্বাক্ষর / সাইন</label>
+                <button type="button" onclick="clearSignaturePad()" class="text-[11px] text-rose-600 font-semibold">মুছুন</button>
+              </div>
+              <canvas id="m-sign-canvas" width="180" height="58" class="signature-canvas w-full h-14 rounded-lg border border-slate-200"></canvas>
+              <input id="m-sign-data" type="hidden" value="${existing ? existing.signature || DEFAULT_SIGN : DEFAULT_SIGN}" />
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-[#15499F] hover:bg-[#0f3678] text-white font-bold text-xs shadow transition">
+            সংরক্ষণ করুন
+          </button>
+        </form>
+      `;
+
+      openModal(title, bodyHtml, `<button type="button" onclick="closeModal()" class="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-700 text-xs font-semibold">বাতিল</button>`);
+      setTimeout(() => initSignaturePad(existing ? existing.signature : ''), 50);
+    }
+
+    function onMemberPhotoPicked(input) {
+      if (!input.files || !input.files[0]) return;
+      compressImageFile(input.files[0], 220, dataUrl => {
+        document.getElementById('m-photo-preview').src = dataUrl;
+        document.getElementById('m-photo-data').value = dataUrl;
+      });
+    }
+
+    function initSignaturePad(existingDataUrl) {
+      const canvas = document.getElementById('m-sign-canvas');
+      if (!canvas) return;
+      signPadCtx = canvas.getContext('2d');
+      signPadCtx.strokeStyle = '#0f172a';
+      signPadCtx.lineWidth = 2.2;
+      signPadCtx.lineCap = 'round';
+      signPadCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (existingDataUrl && existingDataUrl.startsWith('data:image/png')) {
+        const img = new Image();
+        img.onload = () => signPadCtx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        img.src = existingDataUrl;
+      }
+
+      const getPos = e => {
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches && e.touches[0];
+        const clientX = touch ? touch.clientX : e.clientX;
+        const clientY = touch ? touch.clientY : e.clientY;
+        return {
+          x: ((clientX - rect.left) / rect.width) * canvas.width,
+          y: ((clientY - rect.top) / rect.height) * canvas.height
+        };
+      };
+
+      const start = e => {
+        e.preventDefault();
+        isDrawingSign = true;
+        const p = getPos(e);
+        signPadCtx.beginPath();
+        signPadCtx.moveTo(p.x, p.y);
+      };
+
+      const move = e => {
+        if (!isDrawingSign) return;
+        e.preventDefault();
+        const p = getPos(e);
+        signPadCtx.lineTo(p.x, p.y);
+        signPadCtx.stroke();
+      };
+
+      const end = () => {
+        if (!isDrawingSign) return;
+        isDrawingSign = false;
+        document.getElementById('m-sign-data').value = canvas.toDataURL('image/png');
+      };
+
+      canvas.addEventListener('mousedown', start);
+      canvas.addEventListener('mousemove', move);
+      window.addEventListener('mouseup', end);
+      canvas.addEventListener('touchstart', start, { passive: false });
+      canvas.addEventListener('touchmove', move, { passive: false });
+      window.addEventListener('touchend', end);
+    }
+
+    function clearSignaturePad() {
+      const canvas = document.getElementById('m-sign-canvas');
+      if (!canvas || !signPadCtx) return;
+      signPadCtx.clearRect(0, 0, canvas.width, canvas.height);
+      document.getElementById('m-sign-data').value = DEFAULT_SIGN;
+    }
+
+    function saveMemberFromModal(e, editId) {
+      e.preventDefault();
+      const countryCode = document.getElementById('m-country').value;
+      const cObj = getCountryObj(countryCode);
+      const mobile = normalizeFullPhone(cObj.dial, document.getElementById('m-mobile').value);
+
+      const duplicate = state.users.find(u => u.mobile === mobile && u.id !== editId);
+      if (duplicate) {
+        showToast('এই মোবাইল নাম্বার দিয়ে ইতিমধ্যে সদস্য আছেন।', 'error');
+        return;
+      }
+
+      const canvas = document.getElementById('m-sign-canvas');
+      let sigValue = document.getElementById('m-sign-data').value;
+      if (canvas) {
+        const png = canvas.toDataURL('image/png');
+        if (png && png.length > 1800) sigValue = png;
+      }
+
+      const payload = {
+        name: document.getElementById('m-name').value.trim(),
+        country: countryCode,
+        mobile,
+        fatherName: document.getElementById('m-father').value.trim(),
+        motherName: document.getElementById('m-mother').value.trim(),
+        spouseName: document.getElementById('m-spouse').value.trim(),
+        nomineeName: document.getElementById('m-nominee').value.trim(),
+        nid: document.getElementById('m-nid').value.trim(),
+        password: document.getElementById('m-password').value,
+        photo: document.getElementById('m-photo-data').value || DEFAULT_AVATAR,
+        signature: sigValue || DEFAULT_SIGN
+      };
+
+      if (editId) {
+        const idx = state.users.findIndex(u => u.id === editId);
+        if (idx !== -1) {
+          const roleEl = document.getElementById('m-role');
+          const nextRole = state.users[idx].role === 'MAIN_ADMIN' ? 'MAIN_ADMIN' : (roleEl ? roleEl.value : state.users[idx].role);
+          state.users[idx] = { ...state.users[idx], ...payload, role: nextRole };
+          showToast('সদস্যের তথ্য আপডেট হয়েছে।');
+        }
+      } else {
+        if (state.users.length >= MEMBER_CAPACITY) {
+          showToast('গ্রাহক সীমা পূর্ণ হয়ে গেছে।', 'error');
+          return;
+        }
+        const roleEl = document.getElementById('m-role');
+        state.users.push({
+          id: 'USR-' + Date.now(),
+          ...payload,
+          role: roleEl ? roleEl.value : 'MEMBER'
+        });
+        showToast('নতুন সদস্য যুক্ত হয়েছেন! তিনি যেকোনো দেশ থেকে সাইন ইন করতে পারবেন।');
+      }
+
+      saveState();
+      closeModal();
+      renderApp();
+    }
+
+    function openProfileModal() {
+      const u = getCurrentUser();
+      if (!u) return;
+      openMemberModal(u.id);
+    }
+
+    // ==================== INTERNATIONAL ONLINE PAYMENT & BANKING ====================
+    function populateMemberSelects() {
+      const user = getCurrentUser();
+      const admin = isAdmin(user);
+      const list = admin ? state.users : state.users.filter(u => u.id === user.id);
+      const html = list.map(u => `<option value="${u.id}">${u.name} (${u.mobile})</option>`).join('');
+      document.getElementById('pay-member').innerHTML = html;
+      document.getElementById('loan-member').innerHTML = html;
+    }
+
+    function handleAddSocietyAccount(e) {
+      e.preventDefault();
+      const user = getCurrentUser();
+      if (!isAdmin(user)) {
+        showToast('শুধুমাত্র অ্যাডমিন পেমেন্ট অ্যাকাউন্ট যুক্ত করতে পারবেন।', 'error');
+        return;
+      }
+
+      state.societyAccounts.unshift({
+        id: 'ACC-' + Date.now(),
+        bankName: document.getElementById('acc-bank-name').value.trim(),
+        holderName: document.getElementById('acc-holder-name').value.trim(),
+        accountNumber: document.getElementById('acc-number').value.trim(),
+        swift: document.getElementById('acc-swift').value.trim()
+      });
+
+      document.getElementById('acc-bank-name').value = '';
+      document.getElementById('acc-holder-name').value = '';
+      document.getElementById('acc-number').value = '';
+      document.getElementById('acc-swift').value = '';
+      saveState();
+      showToast('সমিতির অনলাইন পেমেন্ট / ব্যাংক অ্যাকাউন্ট যুক্ত হয়েছে।');
+      renderApp();
+    }
+
+    function removeSocietyAccount(accId) {
+      state.societyAccounts = state.societyAccounts.filter(a => a.id !== accId);
+      saveState();
+      renderApp();
+    }
+
+    function handleRecordPayment(e) {
+      e.preventDefault();
+      const user = getCurrentUser();
+      const memberId = document.getElementById('pay-member').value;
+      const member = state.users.find(u => u.id === memberId);
+      const month = document.getElementById('pay-month').value;
+      const year = document.getElementById('pay-year').value;
+      const type = document.getElementById('pay-type').value;
+      const amount = Number(document.getElementById('pay-amount').value);
+      const senderCountryCode = document.getElementById('pay-country').value;
+      const senderCountry = getCountryObj(senderCountryCode).name;
+      const method = document.getElementById('pay-method').value;
+      const trx = document.getElementById('pay-trx').value.trim();
+
+      const autoVerified = isAdmin(user) || user.role === 'CASHIER';
+      const status = autoVerified ? 'VERIFIED' : 'PENDING';
+
+      const payment = {
+        id: 'PAY-' + Date.now(),
+        memberId,
+        memberName: member ? member.name : 'সদস্য',
+        month,
+        year,
+        type,
+        amount,
+        senderCountry,
+        method,
+        trx,
+        status,
+        date: new Date().toLocaleDateString('bn-BD')
+      };
+
+      state.payments.unshift(payment);
+
+      if (!autoVerified) {
+        state.messages.unshift({
+          id: 'MSG-' + Date.now(),
+          title: `নতুন আন্তর্জাতিক অনলাইন পেমেন্ট ভেরিফিকেশন (${senderCountry})`,
+          body: `${payment.memberName} (${method}) মাধ্যমে ${month} ${year}-এর ${type} বাবদ ${formatMoney(amount)} পাঠিয়েছেন। TrxID: ${trx}`,
+          time: new Date().toLocaleString('bn-BD'),
+          read: false
+        });
+      }
+
+      document.getElementById('pay-amount').value = '';
+      document.getElementById('pay-trx').value = '';
+      saveState();
+
+      showToast(
+        autoVerified
+          ? `${payment.memberName}-এর ${formatMoney(amount)} ভেরিফাই হয়ে মূল ব্যালেন্সে যুক্ত হয়েছে!`
+          : `অনলাইন পেমেন্ট (${formatMoney(amount)}) জমা হয়েছে! অ্যাডমিন/ক্যাশিয়ার TrxID যাচাই করলে ব্যালেন্সে যুক্ত হবে।`
+      );
+      renderApp();
+    }
+
+    function verifyOnlinePayment(payId) {
+      const p = state.payments.find(item => item.id === payId);
+      if (!p) return;
+      p.status = 'VERIFIED';
+      saveState();
+      showToast(`পেমেন্ট (${p.trx}) ভেরিফাই সম্পন্ন হয়েছে ও ব্যালেন্সে যোগ হয়েছে!`);
+      renderApp();
+    }
+
+    function rejectOnlinePayment(payId) {
+      const p = state.payments.find(item => item.id === payId);
+      if (!p) return;
+      p.status = 'REJECTED';
+      saveState();
+      showToast('পেমেন্ট রিকোয়েস্ট বাতিল করা হয়েছে।', 'info');
+      renderApp();
+    }
+
+    function viewReceiptModal(payId) {
+      const p = state.payments.find(item => item.id === payId);
+      if (!p) return;
+      openModal(
+        state.lang === 'bn' ? 'আন্তর্জাতিক ডিজিটাল মানি রসিদ' : 'Digital Payment Receipt',
+        `
+          <div class="border border-dashed border-blue-300 bg-blue-50/40 rounded-xl p-3.5 space-y-1.5 text-xs">
+            <div class="text-center font-bold text-sm text-[#15499F] pb-1.5 border-b border-blue-200/60">${state.settings.societyName}</div>
+            <div class="flex justify-between"><span class="text-slate-500">রসিদ নং:</span><span class="font-mono font-bold">${p.id}</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">সদস্য:</span><span class="font-bold">${p.memberName}</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">প্রেরকের দেশ:</span><span>${p.senderCountry || 'বাংলাদেশ'}</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">মাস / সাল:</span><span>${p.month}, ${p.year}</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">ধরন:</span><span class="font-bold">${p.type}</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">পেমেন্ট মাধ্যম:</span><span>${p.method}</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">TrxID / Ref:</span><span class="font-mono">${p.trx}</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">অবস্থা:</span><span class="font-bold ${p.status === 'VERIFIED' ? 'text-emerald-700' : 'text-amber-700'}">${p.status}</span></div>
+            <div class="flex justify-between pt-2 border-t border-blue-200/60 text-sm font-bold text-[#15499F]"><span>পরিমাণ:</span><span>${formatMoney(p.amount)}</span></div>
+          </div>
+        `,
+        `
+          <button type="button" onclick="window.print()" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">প্রিন্ট</button>
+          <button type="button" onclick="closeModal()" class="px-4 py-1.5 rounded-xl bg-[#15499F] text-white text-xs font-bold">বন্ধ করুন</button>
+        `
+      );
+    }
+
+    // ==================== LOANS, EMI CALCULATOR, LEDGER & MESSAGES ====================
+    function handleLoanApplication(e) {
+      e.preventDefault();
+      const memberId = document.getElementById('loan-member').value;
+      const member = state.users.find(u => u.id === memberId);
+      const amount = Number(document.getElementById('loan-amount').value);
+      const installments = Number(document.getElementById('loan-installments').value);
+      const purpose = document.getElementById('loan-purpose').value.trim();
+
+      state.loans.unshift({
+        id: 'LN-' + Date.now(),
+        memberId,
+        memberName: member ? member.name : 'সদস্য',
+        memberMobile: member ? member.mobile : '',
+        amount,
+        installments,
+        purpose,
+        status: 'PENDING',
+        date: new Date().toLocaleDateString('bn-BD')
+      });
+
+      document.getElementById('loan-amount').value = '';
+      document.getElementById('loan-purpose').value = '';
+      saveState();
+      showToast('লোনের আবেদন জমা হয়েছে। অ্যাডমিন অনুমোদনের অপেক্ষায় আছে।');
+      renderApp();
+    }
+
+    function approveLoan(loanId) {
+      const adminUser = getCurrentUser();
+      if (!isAdmin(adminUser)) return;
+      const loan = state.loans.find(l => l.id === loanId);
+      if (!loan) return;
+
+      loan.status = 'APPROVED';
+      const cashiers = state.users.filter(u => u.role === 'CASHIER');
+      const cashierNames = cashiers.length ? cashiers.map(c => c.name).join(', ') : 'ক্যাশিয়ার';
+
+      state.messages.unshift({
+        id: 'MSG-' + Date.now(),
+        loanId: loan.id,
+        title: `লোন অনুমোদিত — ক্যাশিয়ার বার্তা (${cashierNames})`,
+        body: `সদস্য "${loan.memberName}" (${loan.memberMobile})-এর ${formatMoney(loan.amount)} লোন অনুমোদন করেছেন ${adminUser.name}। অনুগ্রহ করে টাকা প্রদান করুন।`,
+        time: new Date().toLocaleString('bn-BD'),
+        read: false
+      });
+
+      saveState();
+      showToast(`লোন অনুমোদিত হয়েছে এবং ক্যাশিয়ার (${cashierNames})-কে বার্তা পাঠানো হয়েছে!`);
+      renderApp();
+    }
+
+    function rejectLoan(loanId) {
+      const loan = state.loans.find(l => l.id === loanId);
+      if (!loan) return;
+      loan.status = 'REJECTED';
+      saveState();
+      showToast('লোন আবেদন বাতিল করা হয়েছে।', 'info');
+      renderApp();
+    }
+
+    function markLoanDisbursed(loanId) {
+      const loan = state.loans.find(l => l.id === loanId);
+      if (!loan) return;
+      loan.status = 'DISBURSED';
+      saveState();
+      showToast('লোন প্রদান সম্পন্ন হিসেবে সংরক্ষিত হয়েছে।');
+      renderApp();
+    }
+
+    function calculateLoanEmi() {
+      const p = Number(document.getElementById('calc-principal').value || 0);
+      const r = Number(document.getElementById('calc-rate').value || 0);
+      const m = Math.max(1, Number(document.getElementById('calc-months').value || 1));
+
+      const profit = (p * r) / 100;
+      const total = p + profit;
+      const emi = total / m;
+
+      document.getElementById('calc-res-emi').innerText = formatMoney(emi);
+      document.getElementById('calc-res-profit').innerText = formatMoney(profit);
+      document.getElementById('calc-res-total').innerText = formatMoney(total);
+    }
+
+    function handleLedgerEntry(e) {
+      e.preventDefault();
+      const type = document.getElementById('ledger-type').value;
+      const amount = Number(document.getElementById('ledger-amount').value);
+      const note = document.getElementById('ledger-note').value.trim();
+      state.ledger.unshift({
+        id: 'LDG-' + Date.now(),
+        type,
+        amount,
+        note,
+        date: new Date().toLocaleDateString('bn-BD')
+      });
+      document.getElementById('ledger-amount').value = '';
+      document.getElementById('ledger-note').value = '';
+      saveState();
+      showToast(type === 'INCOME' ? 'আয় যুক্ত হয়েছে।' : 'ব্যয় যুক্ত হয়েছে।');
+      renderApp();
+    }
+
+    function handleBankTransaction(e) {
+      e.preventDefault();
+      const bankName = document.getElementById('bank-name').value.trim();
+      const action = document.getElementById('bank-action').value;
+      const amount = Number(document.getElementById('bank-amount').value);
+      state.bankTransactions.unshift({
+        id: 'BNK-' + Date.now(),
+        bankName,
+        action,
+        amount,
+        date: new Date().toLocaleDateString('bn-BD')
+      });
+      document.getElementById('bank-name').value = '';
+      document.getElementById('bank-amount').value = '';
+      saveState();
+      showToast('ব্যাংকিং লেনদেন সংরক্ষিত হয়েছে।');
+      renderApp();
+    }
+
+    function handleSendCustomMessage(e) {
+      e.preventDefault();
+      const sender = getCurrentUser();
+      const input = document.getElementById('custom-msg-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      state.messages.unshift({
+        id: 'MSG-' + Date.now(),
+        title: `${sender ? sender.name : 'সমিতি'} (${sender ? getRoleLabel(sender.role) : ''})`,
+        body: text,
+        time: new Date().toLocaleString('bn-BD'),
+        read: false
+      });
+      input.value = '';
+      saveState();
+      showToast('বার্তা পাঠানো হয়েছে।');
+      renderApp();
+    }
+
+    function markAllMessagesRead() {
+      state.messages.forEach(m => (m.read = true));
+      saveState();
+      renderApp();
+    }
+
+    // ==================== SETTINGS & ROLE ASSIGNMENT ====================
+    function handleLogoFileChange(input) {
+      if (!input.files || !input.files[0]) return;
+      compressImageFile(input.files[0], 200, dataUrl => {
+        state.settings.logo = dataUrl;
+        saveState();
+        applyBranding();
+        renderSettingsView();
+        showToast('সমিতির লোগো আপডেট হয়েছে।');
+      });
+    }
+
+    function clearSocietyLogo() {
+      state.settings.logo = '';
+      saveState();
+      applyBranding();
+      renderSettingsView();
+      showToast('লোগো মুছে ফেলা হয়েছে।', 'info');
+    }
+
+    function handleSaveSocietySettings(e) {
+      e.preventDefault();
+      state.settings.societyName = document.getElementById('set-society-name').value.trim() || 'নব আলো সমবায় সমিতি';
+      state.settings.country = document.getElementById('set-country').value;
+      state.settings.currency = document.getElementById('set-currency').value;
+      state.settings.aims = document.getElementById('set-society-aims').value.trim();
+      saveState();
+      renderApp();
+      showToast('সমিতির নাম, দেশ, মুদ্রা ও তথ্য সংরক্ষণ হয়েছে!');
+    }
+
+    function assignUserRole(userId, role) {
+      const target = state.users.find(u => u.id === userId);
+      if (!target || target.role === 'MAIN_ADMIN') return;
+      target.role = role;
+      saveState();
+      showToast(`${target.name}-এর পদবি "${getRoleLabel(role)}" করা হয়েছে।`);
+      renderApp();
+    }
+
+    function confirmResetAll() {
+      openModal(
+        state.lang === 'bn' ? 'সতর্কবার্তা: সব ডাটা রিসেট' : 'Confirm Reset',
+        `<p class="text-xs text-rose-700 font-medium">${I18N[state.lang].resetSystemDesc}</p>`,
+        `
+          <button type="button" onclick="closeModal()" class="px-3 py-1.5 rounded-xl bg-slate-200 text-xs font-semibold">বাতিল</button>
+          <button type="button" onclick="executeResetAll()" class="px-3 py-1.5 rounded-xl bg-rose-600 text-white text-xs font-bold">হ্যাঁ, শূন্য করুন</button>
+        `
+      );
+    }
+
+    function executeResetAll() {
+      localStorage.removeItem(STORAGE_KEY);
+      state = createInitialState();
+      closeModal();
+      showToast('সবকিছু শূন্য (0.00) থেকে রিসেট হয়েছে।', 'info');
+      renderApp();
+    }
+
+    // ==================== SUB-VIEW RENDERERS ====================
+    function renderSubViews() {
+      const user = getCurrentUser();
+      const admin = isAdmin(user);
+      const cashierOrAdmin = user && (admin || user.role === 'CASHIER');
+
+      // Society receiving accounts preview in Savings & Banking
+      const accPreview = document.getElementById('savings-bank-preview');
+      const accFullList = document.getElementById('society-accounts-list');
+      document.getElementById('bank-account-setup-card').classList.toggle('hidden', !admin);
+
+      if (state.societyAccounts.length === 0) {
+        const emptyMsg = `<p class="text-[11px] text-slate-500">এখনো কোনো ব্যাংক/গেটওয়ে অ্যাকাউন্ট যুক্ত করা হয়নি। অ্যাডমিন ব্যাংকিং মেনু থেকে অ্যাকাউন্ট নম্বর ও SWIFT/IBAN যুক্ত করতে পারবেন।</p>`;
+        accPreview.innerHTML = emptyMsg;
+        accFullList.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">কোনো ব্যাংক বা গেটওয়ে অ্যাকাউন্ট নেই</p>`;
+      } else {
+        accPreview.innerHTML = state.societyAccounts.slice(0, 2).map(a => `
+          <div class="bg-white rounded-xl p-2 border border-blue-100 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="font-bold text-slate-800 truncate">${a.bankName} — ${a.holderName}</p>
+              <p class="font-mono text-[11px] text-[#15499F] truncate">${a.accountNumber} ${a.swift ? `• ${a.swift}` : ''}</p>
+            </div>
+          </div>
+        `).join('');
+
+        accFullList.innerHTML = state.societyAccounts.map(a => `
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between gap-2 text-xs">
+            <div class="min-w-0">
+              <p class="font-bold text-slate-800">${a.bankName}</p>
+              <p class="text-slate-600">${a.holderName}</p>
+              <p class="font-mono text-[#15499F] mt-0.5">${a.accountNumber} ${a.swift ? `(${a.swift})` : ''}</p>
+            </div>
+            ${admin ? `<button type="button" onclick="removeSocietyAccount('${a.id}')" class="text-rose-600 text-[11px] font-bold">মুছুন</button>` : ''}
+          </div>
+        `).join('');
+      }
+
+      // Payments history & verification
+      const payHist = document.getElementById('payments-history');
+      if (state.payments.length === 0) {
+        payHist.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">এখনো কোনো অনলাইন পেমেন্ট জমা হয়নি (${formatMoney(0)})</p>`;
+      } else {
+        payHist.innerHTML = state.payments.map(p => {
+          const stBadge = p.status === 'VERIFIED'
+            ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">ভেরিফাইড</span>`
+            : (p.status === 'REJECTED'
+              ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">বাতিল</span>`
+              : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">যাচাই অপেক্ষমাণ</span>`);
+          return `
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <p class="text-xs font-bold text-slate-800">${p.memberName}</p>
+                    ${stBadge}
+                  </div>
+                  <p class="text-[11px] text-slate-500 mt-0.5">${p.month}, ${p.year} • ${p.type} • ${p.senderCountry || ''}</p>
+                  <p class="text-[11px] text-slate-600">${p.method} • <span class="font-mono font-semibold">${p.trx}</span></p>
+                </div>
+                <div class="flex flex-col items-end gap-1 shrink-0">
+                  <span class="text-xs font-bold text-[#15499F]">${formatMoney(p.amount)}</span>
+                  <button type="button" onclick="viewReceiptModal('${p.id}')" class="px-2 py-1 rounded-lg bg-white border border-slate-200 text-[#15499F] text-[10px] font-bold flex items-center gap-1">
+                    <i data-lucide="receipt" class="w-3 h-3"></i> রসিদ
+                  </button>
+                </div>
+              </div>
+              ${cashierOrAdmin && p.status === 'PENDING' ? `
+                <div class="flex gap-2 pt-1 border-t border-slate-200/60">
+                  <button type="button" onclick="verifyOnlinePayment('${p.id}')" class="px-3 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold">ভেরিফাই ও যোগ করুন</button>
+                  <button type="button" onclick="rejectOnlinePayment('${p.id}')" class="px-3 py-1 rounded-lg bg-rose-100 text-rose-700 text-xs font-bold">বাতিল</button>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Loans list
+      const loansEl = document.getElementById('loans-list');
+      if (state.loans.length === 0) {
+        loansEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">কোনো লোন আবেদন নেই</p>`;
+      } else {
+        loansEl.innerHTML = state.loans.map(ln => {
+          const badgeMap = {
+            PENDING: ['অপেক্ষমাণ', 'bg-amber-100 text-amber-800'],
+            APPROVED: ['অনুমোদিত (ক্যাশিয়ারে বার্তা গেছে)', 'bg-blue-100 text-blue-800'],
+            DISBURSED: ['প্রদান সম্পন্ন', 'bg-emerald-100 text-emerald-800'],
+            REJECTED: ['বাতিল', 'bg-rose-100 text-rose-800']
+          };
+          const [bLabel, bCls] = badgeMap[ln.status] || badgeMap.PENDING;
+          return `
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <p class="text-xs font-bold text-slate-800">${ln.memberName} (${ln.memberMobile})</p>
+                  <p class="text-xs font-bold text-[#15499F]">${formatMoney(ln.amount)} • ${fmtCount(ln.installments)} কিস্তি</p>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${bCls}">${bLabel}</span>
+              </div>
+              <p class="text-xs text-slate-600">${ln.purpose} <span class="text-[11px] text-slate-400">(${ln.date})</span></p>
+              <div class="flex flex-wrap gap-2 pt-1">
+                ${admin && ln.status === 'PENDING' ? `
+                  <button type="button" onclick="approveLoan('${ln.id}')" class="px-3 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold">অনুমোদন দিন</button>
+                  <button type="button" onclick="rejectLoan('${ln.id}')" class="px-3 py-1 rounded-lg bg-rose-100 text-rose-700 text-xs font-bold">বাতিল</button>
+                ` : ''}
+                ${cashierOrAdmin && ln.status === 'APPROVED' ? `
+                  <button type="button" onclick="markLoanDisbursed('${ln.id}')" class="px-3 py-1 rounded-lg bg-[#15499F] text-white text-xs font-bold">টাকা প্রদান সম্পন্ন</button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Ledger list
+      const ledgerEl = document.getElementById('ledger-list');
+      if (state.ledger.length === 0) {
+        ledgerEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">কোনো আয় বা ব্যয় নেই (${formatMoney(0)})</p>`;
+      } else {
+        ledgerEl.innerHTML = state.ledger.map(item => `
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-800">${item.note}</p>
+              <p class="text-[11px] text-slate-400">${item.date} • ${item.type === 'INCOME' ? 'আয়' : 'ব্যয়'}</p>
+            </div>
+            <span class="text-xs font-bold ${item.type === 'INCOME' ? 'text-emerald-700' : 'text-rose-600'}">
+              ${item.type === 'INCOME' ? '+' : '-'} ${formatMoney(item.amount)}
+            </span>
+          </div>
+        `).join('');
+      }
+
+      // Bank list
+      const bankEl = document.getElementById('bank-list');
+      if (state.bankTransactions.length === 0) {
+        bankEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">কোনো ব্যাংকিং লেনদেন নেই</p>`;
+      } else {
+        bankEl.innerHTML = state.bankTransactions.map(b => `
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-800">${b.bankName}</p>
+              <p class="text-[11px] text-slate-500">${b.date} • ${b.action === 'DEPOSIT' ? 'ব্যাংকে জমা' : 'উত্তোলন'}</p>
+            </div>
+            <span class="text-xs font-bold text-[#15499F]">${formatMoney(b.amount)}</span>
+          </div>
+        `).join('');
+      }
+
+      // Reports & Collection Sheet
+      const m = computeMetrics();
+      document.getElementById('report-summary-grid').innerHTML = `
+        <div class="p-3 rounded-xl bg-blue-50/70 border border-blue-100">
+          <p class="text-slate-500">ভেরিফাইড আদায়</p>
+          <p class="font-bold text-sm text-[#15499F] mt-0.5">${formatMoney(m.verifiedCollections)}</p>
+        </div>
+        <div class="p-3 rounded-xl bg-amber-50/70 border border-amber-100">
+          <p class="text-slate-500">বিতরণকৃত ঋণ</p>
+          <p class="font-bold text-sm text-amber-800 mt-0.5">${formatMoney(m.loansOut)}</p>
+        </div>
+        <div class="p-3 rounded-xl bg-emerald-50/70 border border-emerald-100">
+          <p class="text-slate-500">অন্যান্য আয়</p>
+          <p class="font-bold text-sm text-emerald-700 mt-0.5">${formatMoney(m.extraIncome)}</p>
+        </div>
+        <div class="p-3 rounded-xl bg-rose-50/70 border border-rose-100">
+          <p class="text-slate-500">মোট ব্যয়</p>
+          <p class="font-bold text-sm text-rose-700 mt-0.5">${formatMoney(m.expenseTotal)}</p>
+        </div>
+      `;
+
+      const sheetEl = document.getElementById('collection-sheet-body');
+      if (state.users.length === 0) {
+        sheetEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">সদস্য নেই</p>`;
+      } else {
+        sheetEl.innerHTML = state.users.map(u => {
+          const sum = state.payments
+            .filter(p => p.memberId === u.id && p.status === 'VERIFIED')
+            .reduce((acc, p) => acc + Number(p.amount || 0), 0);
+          return `
+            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+              <span class="font-semibold text-slate-800">${u.name} <span class="text-slate-400">(${u.mobile})</span></span>
+              <span class="font-bold text-[#15499F]">${formatMoney(sum)}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Messages list
+      const msgEl = document.getElementById('messages-list');
+      if (state.messages.length === 0) {
+        msgEl.innerHTML = `<div class="bg-white rounded-2xl p-5 text-center text-xs text-slate-400">কোনো বার্তা নেই</div>`;
+      } else {
+        msgEl.innerHTML = state.messages.map(msg => `
+          <div class="p-3.5 rounded-2xl border ${msg.read ? 'bg-white border-slate-200/70' : 'bg-amber-50/80 border-amber-300'} space-y-1">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-xs font-bold text-slate-800">${msg.title}</p>
+              ${!msg.read ? `<span class="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold">NEW</span>` : ''}
+            </div>
+            <p class="text-xs text-slate-700 leading-relaxed">${msg.body}</p>
+            <p class="text-[10px] text-slate-400">${msg.time}</p>
+          </div>
+        `).join('');
+      }
+
+      calculateLoanEmi();
+      renderSettingsView();
+    }
+
+    function renderSettingsView() {
+      const user = getCurrentUser();
+      if (!user) return;
+      document.getElementById('set-society-name').value = state.settings.societyName || '';
+      document.getElementById('set-country').value = state.settings.country || 'BD';
+      document.getElementById('set-currency').value = state.settings.currency || 'BDT';
+      document.getElementById('set-society-aims').value = state.settings.aims || '';
+
+      const preview = document.getElementById('set-logo-preview');
+      const empty = document.getElementById('set-logo-empty');
+      if (state.settings.logo) {
+        preview.src = state.settings.logo;
+        preview.classList.remove('hidden');
+        empty.classList.add('hidden');
+      } else {
+        preview.classList.add('hidden');
+        empty.classList.remove('hidden');
+      }
+
+      const canAssign = user.role === 'MAIN_ADMIN';
+      const roleBox = document.getElementById('role-assignment-list');
+      roleBox.innerHTML = state.users.map(u => `
+        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-2 text-xs">
+          <div class="min-w-0">
+            <p class="font-bold text-slate-800 truncate">${u.name}</p>
+            <p class="text-[11px] text-slate-500 font-mono">${u.mobile}</p>
+          </div>
+          ${u.role === 'MAIN_ADMIN'
+            ? `<span class="px-2.5 py-1 rounded-lg bg-blue-100 text-[#15499F] font-bold">${getRoleLabel(u.role)}</span>`
+            : `<select ${!canAssign ? 'disabled' : ''} onchange="assignUserRole('${u.id}', this.value)" class="px-2 py-1 rounded-lg border border-slate-200 bg-white font-semibold outline-none">
+                <option value="MEMBER" ${u.role === 'MEMBER' ? 'selected' : ''}>${state.lang === 'bn' ? 'সদস্য' : 'Member'}</option>
+                <option value="CASHIER" ${u.role === 'CASHIER' ? 'selected' : ''}>${state.lang === 'bn' ? 'ক্যাশিয়ার' : 'Cashier'}</option>
+                <option value="CO_ADMIN" ${u.role === 'CO_ADMIN' ? 'selected' : ''}>${state.lang === 'bn' ? 'সহ-অ্যাডমিন' : 'Co-Admin'}</option>
+              </select>`
+          }
+        </div>
+      `).join('');
+
+      document.getElementById('reset-box').classList.toggle('hidden', !canAssign);
+
+      const modeEl = document.getElementById('cloud-mode-select');
+      const autoEl = document.getElementById('cloud-auto-sync');
+      const wsEl = document.getElementById('cloud-workspace-id');
+      const epEl = document.getElementById('cloud-endpoint-url');
+      const keyEl = document.getElementById('cloud-api-key');
+      if (modeEl) modeEl.value = state.cloudConfig.mode || 'SIMULATED';
+      if (autoEl) autoEl.checked = Boolean(state.cloudConfig.autoSync);
+      if (wsEl) wsEl.value = state.cloudConfig.workspaceId || 'samity-default-workspace';
+      if (epEl) epEl.value = state.cloudConfig.endpointUrl || '';
+      if (keyEl) keyEl.value = state.cloudConfig.apiKey || '';
+      toggleCloudCustomFields();
+      renderSyncIndicators();
+    }
+
+    function renderApp() {
+      applyBranding();
+      applyLanguage();
+
+      const authScreen = document.getElementById('auth-screen');
+      const mainScreen = document.getElementById('main-screen');
+      const user = getCurrentUser();
+
+      if (!user) {
+        authScreen.classList.remove('hidden');
+        mainScreen.classList.add('hidden');
+
+        if (state.users.length === 0) {
+          document.getElementById('signup-box').classList.remove('hidden');
+          document.getElementById('signin-box').classList.add('hidden');
+          document.getElementById('otp-box').classList.add('hidden');
+        } else {
+          document.getElementById('signup-box').classList.add('hidden');
+          document.getElementById('signin-box').classList.remove('hidden');
+          document.getElementById('otp-box').classList.add('hidden');
+        }
+        lucide.createIcons();
+        return;
+      }
+
+      authScreen.classList.add('hidden');
+      mainScreen.classList.remove('hidden');
+
+      document.getElementById('drawer-user-photo').src = user.photo || DEFAULT_AVATAR;
+      document.getElementById('drawer-user-name').innerText = user.name;
+      document.getElementById('drawer-user-role').innerText = getRoleLabel(user.role);
+      document.getElementById('drawer-user-mobile').innerText = user.mobile;
+
+      const quickSelect = document.getElementById('quick-account-select');
+      quickSelect.innerHTML = state.users.map(u =>
+        `<option value="${u.id}" ${u.id === user.id ? 'selected' : ''}>${u.name} (${getRoleLabel(u.role)})</option>`
+      ).join('');
+
+      populateMemberSelects();
+      renderDashboardMetrics();
+      renderSyncIndicators();
+      renderCustomersView();
+      navigateTo(state.activeView || 'home');
+      lucide.createIcons();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateStaticCountryAndCurrencySelects();
+      renderApp();
+
+      window.addEventListener('online', () => {
+        renderSyncIndicators();
+        showToast('ইন্টারনেট সংযোগ পুনরায় চালু হয়েছে (Online)।', 'info');
+        if (state.cloudConfig.autoSync) {
+          triggerCloudSync(true);
+        }
+      });
+
+      window.addEventListener('offline', () => {
+        renderSyncIndicators();
+        showToast('আপনি অফলাইনে আছেন। সব কাজ লোকালি সেভ ও কিউতে সংরক্ষিত হবে।', 'info');
+      });
+
+      if (isBrowserOnline() && state.cloudConfig.autoSync && state.users.length > 0) {
+        triggerCloudSync(false);
+      }
+    });
+  </script>
+</body>
+</html>
