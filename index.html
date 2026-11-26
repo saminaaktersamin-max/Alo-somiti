@@ -684,7 +684,7 @@
           </div>
         </section>
 
-        <!-- ==================== LOANS VIEW ==================== -->
+        <!-- ==================== LOANS VIEW (UPDATED WITH AMOUNT, DURATION, SERVICE CHARGE & INSTALLMENTS) ==================== -->
         <section id="view-loans" class="app-view space-y-3 hidden fade-in">
           <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/70">
             <h2 class="text-base font-bold text-slate-800 mb-1" data-i18n="loanApplyTitle">ঋণ / লোন আবেদন</h2>
@@ -692,21 +692,58 @@
             <form onsubmit="handleLoanApplication(event)" class="space-y-3">
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="selectMember">আবেদনকারী সদস্য *</label>
-                <select id="loan-member" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-slate-50 outline-none"></select>
+                <select id="loan-member" required class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-[#15499F]"></select>
               </div>
+
               <div class="grid grid-cols-2 gap-2.5">
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-1"><span data-i18n="loanAmount">লোনের পরিমাণ</span> (<span class="active-curr-sym">৳</span>) *</label>
-                  <input id="loan-amount" type="number" min="1" step="0.01" required placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none" />
+                  <input id="loan-amount" type="number" min="1" step="0.01" required placeholder="0.00" oninput="updateLoanFormSummary()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none focus:ring-2 focus:ring-[#15499F]" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="repaymentPeriod">পরিশোধের সময় *</label>
+                  <div class="flex gap-1.5">
+                    <input id="loan-duration-val" type="number" min="1" max="240" required value="10" oninput="updateLoanFormSummary()" class="w-16 px-2.5 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none focus:ring-2 focus:ring-[#15499F]" />
+                    <select id="loan-duration-unit" onchange="updateLoanFormSummary()" class="flex-1 px-2 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white outline-none focus:ring-2 focus:ring-[#15499F]">
+                      <option value="মাস (Months)" selected>মাস (Months)</option>
+                      <option value="বছর (Years)">বছর (Years)</option>
+                      <option value="সপ্তাহ (Weeks)">সপ্তাহ (Weeks)</option>
+                      <option value="দিন (Days)">দিন (Days)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="serviceCharge">সার্ভিস চার্জ (%) *</label>
+                  <input id="loan-service-charge" type="number" min="0" max="100" step="0.1" required value="5" oninput="updateLoanFormSummary()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none focus:ring-2 focus:ring-[#15499F]" />
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="installmentCount">কিস্তির সংখ্যা *</label>
-                  <input id="loan-installments" type="number" min="1" max="60" required value="10" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none" />
+                  <input id="loan-installments" type="number" min="1" max="360" required value="10" oninput="updateLoanFormSummary()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold outline-none focus:ring-2 focus:ring-[#15499F]" />
                 </div>
               </div>
+
+              <!-- Live Loan Calculation Preview -->
+              <div class="bg-blue-50/80 border border-blue-200/80 rounded-xl p-3 space-y-1 text-xs">
+                <div class="flex justify-between">
+                  <span class="text-slate-600">সার্ভিস চার্জ পরিমাণ:</span>
+                  <span id="loan-prev-charge" class="font-bold text-amber-700">৳ ০.০০</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-600">সর্বমোট পরিশোধযোগ্য:</span>
+                  <span id="loan-prev-total" class="font-bold text-slate-800">৳ ০.০০</span>
+                </div>
+                <div class="flex justify-between pt-1 border-t border-blue-200/60">
+                  <span class="font-semibold text-[#15499F]">প্রতি কিস্তির পরিমাণ:</span>
+                  <span id="loan-prev-emi" class="font-bold text-[#15499F]">৳ ০.০০</span>
+                </div>
+              </div>
+
               <div>
                 <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="loanPurpose">লোনের উদ্দেশ্য *</label>
-                <input id="loan-purpose" type="text" required placeholder="ব্যবসা, প্রবাস কল্যাণ বা জরুরি প্রয়োজন" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none" />
+                <input id="loan-purpose" type="text" required placeholder="ব্যবসা, প্রবাস কল্যাণ বা জরুরি প্রয়োজন" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-[#15499F]" />
               </div>
               <button type="submit" class="w-full py-2.5 rounded-xl bg-[#15499F] hover:bg-[#0f3678] text-white font-bold text-sm shadow transition" data-i18n="submitLoan">
                 লোন আবেদন পাঠান
@@ -1082,6 +1119,8 @@
         loanApplyTitle: 'ঋণ / লোন আবেদন',
         loanApplySub: 'অ্যাডমিন অনুমোদন করলে ক্যাশিয়ারের কাছে স্বয়ংক্রিয় বার্তা যাবে',
         loanAmount: 'লোনের পরিমাণ',
+        repaymentPeriod: 'পরিশোধের সময় *',
+        serviceCharge: 'সার্ভিস চার্জ (%) *',
         installmentCount: 'কিস্তির সংখ্যা *',
         loanPurpose: 'লোনের উদ্দেশ্য *',
         submitLoan: 'লোন আবেদন পাঠান',
@@ -1180,6 +1219,8 @@
         loanApplyTitle: 'Loan Application',
         loanApplySub: 'Approved loans automatically send a message to Cashier',
         loanAmount: 'Loan Amount',
+        repaymentPeriod: 'Repayment Period *',
+        serviceCharge: 'Service Charge (%) *',
         installmentCount: 'Installments *',
         loanPurpose: 'Purpose *',
         submitLoan: 'Apply for Loan',
@@ -1232,7 +1273,7 @@
           aims: 'দেশ-বিদেশে অবস্থানরত সকল সদস্যদের নিয়মিত সঞ্চয়, স্বচ্ছ ডিজিটাল হিসাবরক্ষণ, সহজ ঋণ সুবিধা ও পারস্পরিক সহযোগিতার মাধ্যমে একটি আদর্শ সমবায় গড়ে তোলা।'
         },
         cloudConfig: {
-          mode: 'SIMULATED', // 'SIMULATED' | 'CUSTOM_API'
+          mode: 'SIMULATED',
           autoSync: true,
           workspaceId: 'samity-default-workspace',
           endpointUrl: '',
@@ -1380,7 +1421,6 @@
         return remoteJson && remoteJson.data ? remoteJson.data : null;
       }
 
-      // Built-in Simulated Cloud Engine (works immediately with zero external setup)
       await new Promise(resolve => setTimeout(resolve, 260));
       const cloudKey = getSimulatedCloudKey();
       const existingRaw = localStorage.getItem(cloudKey);
@@ -1671,7 +1711,6 @@
       reader.readAsDataURL(file);
     }
 
-    // ==================== DROPDOWN INITIALIZATION ====================
     function populateStaticCountryAndCurrencySelects() {
       const countryOptions = COUNTRIES.map(c => `<option value="${c.code}">${c.name}</option>`).join('');
       const dialOptions = COUNTRIES.map(c => `<option value="${c.dial}">${c.dial} (${c.code})</option>`).join('');
@@ -1720,7 +1759,6 @@
       return `${dialCode}${strippedZero}`;
     }
 
-    // ==================== BRANDING & LANGUAGE ====================
     function applyBranding() {
       const name = state.settings.societyName || 'নব আলো সমবায় সমিতি';
       const countryObj = getCountryObj(state.settings.country);
@@ -1799,7 +1837,6 @@
       );
     }
 
-    // ==================== AUTHENTICATION & INTERNATIONAL OTP ====================
     function handleMainAdminSignup(e) {
       e.preventDefault();
       const societyName = document.getElementById('signup-society-name').value.trim();
@@ -1918,7 +1955,6 @@
       }
     }
 
-    // ==================== DRAWER & NAVIGATION ====================
     function openDrawer() {
       document.getElementById('drawer-backdrop').classList.remove('hidden');
       document.getElementById('side-drawer').classList.remove('-translate-x-full');
@@ -1953,7 +1989,6 @@
       showToast('একাউন্ট পরিবর্তন করা হয়েছে।', 'info');
     }
 
-    // ==================== FINANCIAL METRICS (STRICT ZERO START) ====================
     function computeMetrics() {
       let verifiedCollections = 0;
       let pendingCollections = 0;
@@ -2039,7 +2074,6 @@
       }
     }
 
-    // ==================== MEMBER MANAGEMENT (GLOBAL + PHOTO + SIGNATURE) ====================
     function renderCustomersView() {
       const user = getCurrentUser();
       const canManage = isAdmin(user);
@@ -2323,7 +2357,6 @@
       openMemberModal(u.id);
     }
 
-    // ==================== INTERNATIONAL ONLINE PAYMENT & BANKING ====================
     function populateMemberSelects() {
       const user = getCurrentUser();
       const admin = isAdmin(user);
@@ -2464,14 +2497,41 @@
       );
     }
 
-    // ==================== LOANS, EMI CALCULATOR, LEDGER & MESSAGES ====================
+    // ==================== LOANS WITH AMOUNT, DURATION, SERVICE CHARGE & INSTALLMENTS ====================
+    function updateLoanFormSummary() {
+      const amountEl = document.getElementById('loan-amount');
+      const chargeEl = document.getElementById('loan-service-charge');
+      const instEl = document.getElementById('loan-installments');
+      if (!amountEl || !chargeEl || !instEl) return;
+
+      const principal = Math.max(0, Number(amountEl.value || 0));
+      const chargePct = Math.max(0, Number(chargeEl.value || 0));
+      const installments = Math.max(1, Number(instEl.value || 1));
+
+      const chargeAmount = (principal * chargePct) / 100;
+      const totalPayable = principal + chargeAmount;
+      const perInstallment = totalPayable / installments;
+
+      document.getElementById('loan-prev-charge').innerText = formatMoney(chargeAmount);
+      document.getElementById('loan-prev-total').innerText = formatMoney(totalPayable);
+      document.getElementById('loan-prev-emi').innerText = formatMoney(perInstallment);
+    }
+
     function handleLoanApplication(e) {
       e.preventDefault();
       const memberId = document.getElementById('loan-member').value;
       const member = state.users.find(u => u.id === memberId);
       const amount = Number(document.getElementById('loan-amount').value);
+      const durationVal = Number(document.getElementById('loan-duration-val').value);
+      const durationUnit = document.getElementById('loan-duration-unit').value;
+      const serviceChargePct = Number(document.getElementById('loan-service-charge').value || 0);
       const installments = Number(document.getElementById('loan-installments').value);
       const purpose = document.getElementById('loan-purpose').value.trim();
+
+      const serviceChargeAmount = (amount * serviceChargePct) / 100;
+      const totalPayable = amount + serviceChargeAmount;
+      const installmentAmount = totalPayable / Math.max(1, installments);
+      const repaymentPeriod = `${durationVal} ${durationUnit}`;
 
       state.loans.unshift({
         id: 'LN-' + Date.now(),
@@ -2479,7 +2539,14 @@
         memberName: member ? member.name : 'সদস্য',
         memberMobile: member ? member.mobile : '',
         amount,
+        durationVal,
+        durationUnit,
+        repaymentPeriod,
+        serviceChargePct,
+        serviceChargeAmount,
+        totalPayable,
         installments,
+        installmentAmount,
         purpose,
         status: 'PENDING',
         date: new Date().toLocaleDateString('bn-BD')
@@ -2487,8 +2554,9 @@
 
       document.getElementById('loan-amount').value = '';
       document.getElementById('loan-purpose').value = '';
+      updateLoanFormSummary();
       saveState();
-      showToast('লোনের আবেদন জমা হয়েছে। অ্যাডমিন অনুমোদনের অপেক্ষায় আছে।');
+      showToast('লোনের আবেদন (পরিমাণ, পরিশোধের সময়, সার্ভিস চার্জ ও কিস্তিসহ) জমা হয়েছে।');
       renderApp();
     }
 
@@ -2506,7 +2574,7 @@
         id: 'MSG-' + Date.now(),
         loanId: loan.id,
         title: `লোন অনুমোদিত — ক্যাশিয়ার বার্তা (${cashierNames})`,
-        body: `সদস্য "${loan.memberName}" (${loan.memberMobile})-এর ${formatMoney(loan.amount)} লোন অনুমোদন করেছেন ${adminUser.name}। অনুগ্রহ করে টাকা প্রদান করুন।`,
+        body: `সদস্য "${loan.memberName}" (${loan.memberMobile})-এর ${formatMoney(loan.amount)} লোন (মেয়াদ: ${loan.repaymentPeriod || ''}, সার্ভিস চার্জ: ${fmtCount(loan.serviceChargePct || 0)}%, কিস্তি: ${fmtCount(loan.installments)}টি) অনুমোদন করেছেন ${adminUser.name}।`,
         time: new Date().toLocaleString('bn-BD'),
         read: false
       });
@@ -2612,7 +2680,6 @@
       renderApp();
     }
 
-    // ==================== SETTINGS & ROLE ASSIGNMENT ====================
     function handleLogoFileChange(input) {
       if (!input.files || !input.files[0]) return;
       compressImageFile(input.files[0], 200, dataUrl => {
@@ -2671,13 +2738,11 @@
       renderApp();
     }
 
-    // ==================== SUB-VIEW RENDERERS ====================
     function renderSubViews() {
       const user = getCurrentUser();
       const admin = isAdmin(user);
       const cashierOrAdmin = user && (admin || user.role === 'CASHIER');
 
-      // Society receiving accounts preview in Savings & Banking
       const accPreview = document.getElementById('savings-bank-preview');
       const accFullList = document.getElementById('society-accounts-list');
       document.getElementById('bank-account-setup-card').classList.toggle('hidden', !admin);
@@ -2708,7 +2773,6 @@
         `).join('');
       }
 
-      // Payments history & verification
       const payHist = document.getElementById('payments-history');
       if (state.payments.length === 0) {
         payHist.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">এখনো কোনো অনলাইন পেমেন্ট জমা হয়নি (${formatMoney(0)})</p>`;
@@ -2748,7 +2812,6 @@
         }).join('');
       }
 
-      // Loans list
       const loansEl = document.getElementById('loans-list');
       if (state.loans.length === 0) {
         loansEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">কোনো লোন আবেদন নেই</p>`;
@@ -2761,6 +2824,9 @@
             REJECTED: ['বাতিল', 'bg-rose-100 text-rose-800']
           };
           const [bLabel, bCls] = badgeMap[ln.status] || badgeMap.PENDING;
+          const periodLabel = ln.repaymentPeriod || `${fmtCount(ln.installments)} কিস্তি`;
+          const chargePct = ln.serviceChargePct ?? 0;
+          const emiVal = ln.installmentAmount ?? (Number(ln.amount || 0) / Math.max(1, Number(ln.installments || 1)));
           return `
             <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
               <div class="flex items-center justify-between gap-2">
@@ -2769,6 +2835,11 @@
                   <p class="text-xs font-bold text-[#15499F]">${formatMoney(ln.amount)} • ${fmtCount(ln.installments)} কিস্তি</p>
                 </div>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${bCls}">${bLabel}</span>
+              </div>
+              <div class="grid grid-cols-2 gap-1.5 text-[11px] bg-white p-2 rounded-lg border border-slate-200/60 text-slate-600">
+                <div>পরিশোধের সময়: <strong class="text-slate-800">${periodLabel}</strong></div>
+                <div>সার্ভিস চার্জ: <strong class="text-amber-700">${fmtCount(chargePct)}%</strong></div>
+                <div class="col-span-2">প্রতি কিস্তি: <strong class="text-[#15499F]">${formatMoney(emiVal)}</strong></div>
               </div>
               <p class="text-xs text-slate-600">${ln.purpose} <span class="text-[11px] text-slate-400">(${ln.date})</span></p>
               <div class="flex flex-wrap gap-2 pt-1">
@@ -2785,7 +2856,6 @@
         }).join('');
       }
 
-      // Ledger list
       const ledgerEl = document.getElementById('ledger-list');
       if (state.ledger.length === 0) {
         ledgerEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">কোনো আয় বা ব্যয় নেই (${formatMoney(0)})</p>`;
@@ -2803,7 +2873,6 @@
         `).join('');
       }
 
-      // Bank list
       const bankEl = document.getElementById('bank-list');
       if (state.bankTransactions.length === 0) {
         bankEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-3">কোনো ব্যাংকিং লেনদেন নেই</p>`;
@@ -2819,7 +2888,6 @@
         `).join('');
       }
 
-      // Reports & Collection Sheet
       const m = computeMetrics();
       document.getElementById('report-summary-grid').innerHTML = `
         <div class="p-3 rounded-xl bg-blue-50/70 border border-blue-100">
@@ -2857,7 +2925,6 @@
         }).join('');
       }
 
-      // Messages list
       const msgEl = document.getElementById('messages-list');
       if (state.messages.length === 0) {
         msgEl.innerHTML = `<div class="bg-white rounded-2xl p-5 text-center text-xs text-slate-400">কোনো বার্তা নেই</div>`;
@@ -2874,6 +2941,7 @@
         `).join('');
       }
 
+      updateLoanFormSummary();
       calculateLoanEmi();
       renderSettingsView();
     }
