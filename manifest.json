@@ -1,0 +1,27 @@
+{
+  "name": "সমবায় সমিতি ম্যানেজমেন্ট সিস্টেম",
+  "short_name": "সমবায় সমিতি",
+  "description": "অফলাইন ও ক্লাউড সিংকসহ সদস্য ব্যবস্থাপনা, চাঁদা ও কিস্তি আদায়, আন্তর্জাতিক অনলাইন পেমেন্ট, আয়-ব্যয় এবং লোন অনুমোদন সিস্টেম",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6f9",
+  "theme_color": "#1e40af",
+  "lang": "bn",
+  "categories": ["finance", "business", "productivity"],
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
